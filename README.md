@@ -1,8 +1,8 @@
-# TRABAJO PRACTICO FINAL
-## PROGRAMACION IMPERATIVA
+#TRABAJO PRACTICO FINAL
+##PROGRAMACION IMPERATIVA
 
-### GRUPO 
-## Integrantes:
+###GRUPO 
+##Integrantes:
 
 Julia Priolo (juliapriolo)
     jupriolo@itba.edu.ar 63743
