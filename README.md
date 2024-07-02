@@ -5,13 +5,13 @@
 ##Integrantes:
 
 Julia Priolo (juliapriolo)
-    jipriolo@itba.edu.ar
+    jupriolo@itba.edu.ar 63743
 
-Sebastian Gastón Vega Garrot (svegagarrot)
-    svegagarrot@itba.edu.ar
+Sebastián Gastón Vega Garrot (svegagarrot)
+    svegagarrot@itba.edu.ar 64111
 
 Martina Nudel (Martina)
-    mnudel@itba.edu.ar
+    mnudel@itba.edu.ar 64155
 
 Sofía Inés Ratto (sratto0)
-    sratto@itba.edu.ar
+    sratto@itba.edu.ar 63621
