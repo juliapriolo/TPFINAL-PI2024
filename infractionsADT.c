@@ -4,20 +4,15 @@
 #define MONTHS 12
 
 
-typedef struct query3{
-    char *plate;
-    size_t fineCount; // por patente
-}TQuery3;
-
 typedef struct infractions{
     char *description;
-    TQuery3 *arrPlates;
     size_t id;
     size_t totalFines;// total de multas por infraccion
     struct infractions *tail;
+    TListTickets firstTicket;
 }TInfractions;
 
-typedef struct infractions *TLInfractions;
+typedef struct infractions *TListInfractions;
 
 typedef struct query2{
     char *description;
@@ -30,16 +25,28 @@ typedef struct agency{
     struct agency *tail;
 }TAgency;
 
-typedef struct agency *TLagency;
+typedef struct agency *TListAgency;
 
 typedef struct id{
     char exists;
-    TLInfractions pNode;
+    TListInfractions pNode;
 }TId;
 
+
+typedef struct tickets{
+    char *plate;
+    char *issuingAgency;
+    char *issueDate; //Ver bien el tipo de dato
+    size_t infractionId;
+    size_t fineAmount;
+    struct tickets *tail;
+}TTickets;
+
+typedef struct tickets *TListTickets;
+
 typedef struct infractionsCDT{
-    TLInfractions firstI;
-    TLagency firstA;
+    TListInfractions firstInfraction;
+    TListAgency firstAgency;
     size_t *arrYears[MONTHS]; //vector de años y meses (multas)
     size_t minYear; //años para la query 4
     size_t maxYear;
