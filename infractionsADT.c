@@ -30,7 +30,46 @@ typedef struct agency{
 typedef struct agency *TListAgency;
 
 typedef struct id{
-    size_t id;
+
+
+static void addAgencyInfraction(TQuery2 * infVec, size_t * dim, char * description){
+    for(int i=0; i < *dim; i++){
+        if(strcasecmp(infVec->description, description) == 0){
+            infVec->fineCount++;
+            return;
+        }
+    }
+    *dim += 1;
+    infVec = realloc(infVec, sizeof(TQuery2)*(*dim));
+    infVec[*dim-1].description = strcpy(infVec[*dim-1].description, description);
+    infVec[*dim-1].fineCount = 1;
+    return;
+}
+
+static TListAgency addAgencyRec(TListAgency list, char * agName, size_t id, char * description, size_t totalInf){
+    int c;
+    if(list == NULL || (c = strcasecmp(list->agencyName, agName) > 0)){
+        //si la agencia no estaba tampoco habia ninguna infraccion
+        TListAgency newAgency = malloc(sizeof(TAgency));
+        newAgency->agencyName = strncpy(newAgency->agencyName, description, MAX_AG);
+        addAgencyInfraction(newAgency->infractions, &(newAgency->dimInfractions), description);
+        newAgency->tail = list;
+        return newAgency;
+    }
+
+    if(c==0){
+        addAgencyInfraction(list->infractions, list->dimInfractions, description);
+        return list;
+    }
+
+    list->tail = addAgencyRec(list->tail, agName, description, totalInf);
+    return list;
+
+}
+
+void addAgency(infractionSystemADT infractionSystem, char * agency, char * description){
+    infractionSystem->firstAgency = addAgencyRec(infractionSystem->firstAgency, agency, description);
+}    size_t id;    
     TListInfractions pNode;
 }TId;
 
@@ -157,4 +196,33 @@ static TListAgency addAgencyRec(TListAgency list, char * agName, size_t id, char
 
 void addAgency(infractionSystemADT infractionSystem, char * agency, char * description){
     infractionSystem->firstAgency = addAgencyRec(infractionSystem->firstAgency, agency, description);
+}
+
+//falta TODO lo que esta relacionado al issue date(no terminamos de definirlo todavia) y CHEQUEAR si hace falta el agency o no
+static TListTickets addTicketRec(TListTickets list, char *patente, char *agency, int *flag, size_t infractionId){
+    if(list==NULL || list->infractionAmount==0){
+        TListTickets new=malloc(sizeof(TTickets));
+        new->plate=malloc(strlen(plate+1));
+        strcpy(new->plate, patente);
+        //new->issuingAgency=malloc(strlen(agency+1));
+        //strcpy(new->issuingAgency, agency);
+        new->infractionId=infractionId;
+        new->infractionAmount=1;
+        *flag=1;
+        return new;
+    }
+    if(strcasecmp(list->patente, patente)==0){
+        TListTickets new=malloc(sizeof(TTickets));
+        new->infractionId=infractionId;
+        new->infractionAmount++;
+        return new;
+    }
+    list->tail=addTicketRec(list->tail, patente, agency, flag, infractionId);
+    return list;
+}
+
+int addTicket(TListInfractions first, char *patente, char *agency){
+    int flag=0;
+    
+    first->firstTicket=addTicketRec(first->firstTicket, patente, agency, &flag, first->id);
 }
