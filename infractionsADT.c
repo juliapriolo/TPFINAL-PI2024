@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include "infractionsADT.h"
 
@@ -66,3 +67,33 @@ infractionSystemADT newInfractionSystem(size_t minYear, size_t maxYear){
         return newSystem;
 }
 
+static TListInfractions addInfractionRec(TListInfractions list,char *description,size_t id,size_t *added){
+    int c;
+    if(list == NULL || (c = strcasecmp(list->description,description)) > 0){
+        TListInfractions newNode = malloc(sizeof(TInfractions));
+        newNode->description = malloc(strlen(description) + 1);
+        //Verificar que los malloc hayan funcionado
+        strcpy(newNode->description,description);
+        newNode->firstTicket = NULL;
+        newNode->tail = list;
+        newNode->totalFines = 0;
+        newNode->id = id;
+        *added = 1;
+        return newNode;
+    }
+    else if(c < 0){
+        list->tail = addInfractionRec(list->tail,description,id,added);
+    }
+    return list;
+}
+
+int addInfraction(infractionSystemADT infractionSystem,char *description,size_t id){
+    size_t added = 0; // flag para saber si agrego la infraccion
+    infractionSystem->firstInfraction = addInfractionRec(infractionSystem->firstInfraction,description,id,&added);
+
+    if(added){
+        //agregar el id al vector, agrandarlo y ordenarlo
+    }
+
+    return added;
+}
