@@ -57,8 +57,9 @@ typedef struct infractionSystemCDT{
 
 infractionSystemADT newInfractionSystem(size_t minYear, size_t maxYear){
         infractionSystemADT newSystem = calloc(1,sizeof(infractionSystemADT));
-        //podriamos hacer una macro !!! Creo que en este caso no hace falta hacer lo de errno pero por las dudas confirmar 
-        if(newSystem == NULL){
+        errno = 0;
+        //podriamos hacer una macro !!!  
+        if(newSystem == NULL || errno == ENOMEM){
             return NULL;
         }           
         newSystem->minYear = minYear;
