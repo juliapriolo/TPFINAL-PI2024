@@ -3,6 +3,10 @@
 #include <string.h>
 #include <strings.h>
 
+typedef struct infractionSystemCDT * infractionSystemADT;
+
+infractionSystemADT newInfractionSystem(size_t minYear, size_t maxYear);
+
 typedef struct query1{
     char * infraction;               //nombre de la infraccion
     size_t totalInfracctions;        //cantidad de infracciones;

@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
+#include "infractionsADT.h"
 
 #define MONTHS 12
-
 
 typedef struct infractions{
     char *description;
@@ -42,7 +43,7 @@ typedef struct tickets{
 
 typedef struct tickets *TListTickets;
 
-typedef struct infractionsCDT{
+typedef struct infractionSystemCDT{
     TListInfractions firstInfraction;
     TListAgency firstAgency;
     size_t *arrYears[MONTHS]; //vector de años y meses (multas)
@@ -51,4 +52,17 @@ typedef struct infractionsCDT{
     TId arrId; // vector con los id ordenados
     size_t dim; //dimension total
     size_t size; //espacio ocupado
-}infractionsCDT;
+}infractionSystemCDT;
+
+
+infractionSystemADT newInfractionSystem(size_t minYear, size_t maxYear){
+        infractionSystemADT newSystem = calloc(1,sizeof(infractionSystemADT));
+        //podriamos hacer una macro !!! Creo que en este caso no hace falta hacer lo de errno pero por las dudas confirmar 
+        if(newSystem == NULL){
+            return NULL;
+        }           
+        newSystem->minYear = minYear;
+        newSystem->maxYear = maxYear;
+        return newSystem;
+}
+
