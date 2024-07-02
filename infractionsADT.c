@@ -32,13 +32,11 @@ typedef struct id{
     TListInfractions pNode;
 }TId;
 
-
 typedef struct tickets{
     char *plate;
     char *issuingAgency;
     char *issueDate; //Ver bien el tipo de dato
     size_t infractionId;
-    size_t fineAmount;
     struct tickets *tail;
 }TTickets;
 
