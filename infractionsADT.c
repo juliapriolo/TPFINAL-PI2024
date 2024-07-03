@@ -229,6 +229,46 @@ static TListInfractions binarySearch(TId *arr, size_t id, size_t left, size_t ri
     si la patente no se encuentra entonces la añade de forma alfabetica, sino, aumenta el contador de multas para dicha patente. En ambos casos retorna 1.
 */
 
-int addTicket(infractionSystemADT infractionSystem,size_t id,size_t fineCount ,char *plate){
-    size_t added = 0;
+static TListTickets addTicketRec(TListTickets listTick, char *plate, size_t *added){
+    int c;
+    if(listTick == NULL || (c = strcasecmp(plate, listTick->plate)) < 0 ){
+        errno = 0;
+        TListTickets aux = calloc(1, sizeof(TTickets)); // para iniciar el count en 0
+        if(aux == NULL || errno == ENOMEM){
+            return NULL;
+        }
+        aux->plate = malloc(((strlen(plate)) + 1) * sizeof(char));
+        if(aux->plate == NULL || errno == ENOMEM){
+            free(aux);
+            return NULL;
+        }
+        strcpy(aux->plate, plate);
+        aux->fineCount++;
+        aux->tail = listTick;
+        (*added) = 1; // se agrego una nueva patente y una multa
+        return aux;
+    }
+    if(c == 0){
+        listTick->fineCount++; // como la patente ya estaba, incremento en 1 la cant de multas
+        (*added) = 1; // no se agrego una nueva patente pero si una multa
+        return listTick;
+    }
+    listTick->tail = addTicketRec(listTick->tail, plate, added);
+    return listTick;
 }
+
+int addTicket(infractionSystemADT infractionSystem, size_t id, size_t fineCount, char *plate){
+    if(infractionSystem->arrId == NULL || infractionSystem->dim <= id){
+        return 0;
+    }
+    for(size_t i = 0; i < infractionSystem->dim; i++){
+        if(infractionSystem->arrId[i].id == id){
+            int flag = 0;
+            infractionSystem->arrId[i].pNode = addTicketRec(infractionSystem->arrId[i].pNode, plate, &flag);
+            infractionSystem->arrId[i].pNode->totalFines += flag;
+            return 1;
+        }
+    }
+    return 0;
+}
+
