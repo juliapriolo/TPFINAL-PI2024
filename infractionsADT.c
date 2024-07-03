@@ -268,7 +268,6 @@ int addTicket(infractionSystemADT infractionSystem, size_t id,char *plate){
         return added;
     }
     TListInfractions ticket = binarySearch(infractionSystem->arrId,id,0,infractionSystem->dim-1);
-    printf("Agregando ticket de id: %ld\n",ticket->id);
     if(ticket != NULL){
         ticket->firstTicket = addTicketRec(ticket->firstTicket,plate,&added);
         ticket->totalFines += added;
