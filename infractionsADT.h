@@ -7,6 +7,8 @@ typedef struct infractionSystemCDT * infractionSystemADT;
 
 infractionSystemADT newInfractionSystem(size_t minYear, size_t maxYear);
 
+void addAgency(infractionSystemADT infractionSystem, char * agency, char * description);
+
 typedef struct query1{
     char * infraction;               //nombre de la infraccion
     size_t totalInfracctions;        //cantidad de infracciones;

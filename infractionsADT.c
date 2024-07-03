@@ -23,7 +23,8 @@ typedef struct query2{
 
 typedef struct agency{
     char *agencyName;
-    TQuery2 *infractions; 
+    TQuery2 *infractions;
+    size_t dimInfractions;      //cantidad de tipos de infracciones por agencia
     struct agency *tail;
 }TAgency;
 
@@ -58,15 +59,18 @@ typedef struct infractionSystemCDT{
 
 infractionSystemADT newInfractionSystem(size_t minYear, size_t maxYear){
         infractionSystemADT newSystem = calloc(1,sizeof(infractionSystemCDT));
+        
         errno = 0;
-        //podriamos hacer una macro !!!  
-        if(newSystem == NULL || errno == ENOMEM){
+        if(newSystem == NULL || errno == ENOMEN){
             return NULL;
-        }           
+        }       
+        
         newSystem->minYear = minYear;
         newSystem->maxYear = maxYear;
+
         return newSystem;
 }
+
 
 static int cmpIds(const void *a, const void *b){
     const TId *idA = (const TId *)a;
@@ -117,3 +121,69 @@ int addInfraction(infractionSystemADT infractionSystem,char *description,size_t 
 
     return added;
 }
+
+static void addAgencyInfraction(TQuery2 * infVec, size_t * dim, char * description){
+    for(int i=0; i < *dim; i++){
+        //el tipo de infraccion ya se encontraba en el vector
+        if(strcasecmp(infVec[i].description, description) == 0){
+            infVec->fineCount++;
+            return;
+        }
+    }
+
+    //nuevo tipo de infraccion
+    *dim += 1;
+    errno = 0;
+
+    infVec = realloc(infVec, sizeof(TQuery2)*(*dim));
+
+    if(infVec == NULL || errno == ENOMEN){
+        return 0;
+    }
+
+    infVec[*dim-1].description = malloc(strlen(description)+1);
+
+    if(infVec[*dim-1].description == NULL || errno == ENOMEN){
+        return 0;
+    }
+
+    strcpy(infVec[*dim-1].description, description);
+    infVec[*dim-1].fineCount = 1;
+}
+
+
+static TListAgency addAgencyRec(TListAgency list, char * agName, char * description){
+    int c;
+    errno = 0;
+    if(list == NULL || (c = strcasecmp(list->agencyName, agName) > 0)){
+        //si la agencia no estaba tampoco habia ninguna infraccion
+        TListAgency newAgency = malloc(sizeof(TAgency));
+        if(newAgency == NULL || errno == ENOMEN){
+            return 0;
+        }
+        newAgency->agencyName = malloc(strlen(agName)+1);
+        
+        if(newAgency->agencyName == NULL || errno == ENOMEN){
+            return 0;
+        }
+
+        newAgency->agencyName = strncpy(newAgency->agencyName, description, MAX_AG);
+        addAgencyInfraction(newAgency->infractions, &(newAgency->dimInfractions), description);
+        newAgency->tail = list;
+        return newAgency;
+    }
+
+    if(c==0){
+        addAgencyInfraction(list->infractions, &(list->dimInfractions), description);
+        return list;
+    }
+
+    list->tail = addAgencyRec(list->tail, agName, description);
+    return list;
+
+}
+
+void addAgency(infractionSystemADT infractionSystem, char * agency, char * description){
+    infractionSystem->firstAgency = addAgencyRec(infractionSystem->firstAgency, agency, description);
+}
+
