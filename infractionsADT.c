@@ -5,6 +5,7 @@
 #include "infractionsADT.h"
 
 #define MONTHS 12
+#define MAX_AG 30 //Despues cambiar el valor al que deberia ser
 
 typedef struct infractions{
     char *description;
@@ -37,9 +38,7 @@ typedef struct id{
 
 typedef struct tickets{
     char *plate;
-    char *issuingAgency;
-    char *issueDate; //Ver bien el tipo de dato
-    size_t infractionId;
+    size_t fineCount;
     struct tickets *tail;
 }TTickets;
 
@@ -61,7 +60,7 @@ infractionSystemADT newInfractionSystem(size_t minYear, size_t maxYear){
         infractionSystemADT newSystem = calloc(1,sizeof(infractionSystemCDT));
         
         errno = 0;
-        if(newSystem == NULL || errno == ENOMEN){
+        if(newSystem == NULL || errno == ENOMEM){
             return NULL;
         }       
         
@@ -137,13 +136,13 @@ static void addAgencyInfraction(TQuery2 * infVec, size_t * dim, char * descripti
 
     infVec = realloc(infVec, sizeof(TQuery2)*(*dim));
 
-    if(infVec == NULL || errno == ENOMEN){
+    if(infVec == NULL || errno == ENOMEM){
         return 0;
     }
 
     infVec[*dim-1].description = malloc(strlen(description)+1);
 
-    if(infVec[*dim-1].description == NULL || errno == ENOMEN){
+    if(infVec[*dim-1].description == NULL || errno == ENOMEM){
         return 0;
     }
 
@@ -158,12 +157,12 @@ static TListAgency addAgencyRec(TListAgency list, char * agName, char * descript
     if(list == NULL || (c = strcasecmp(list->agencyName, agName) > 0)){
         //si la agencia no estaba tampoco habia ninguna infraccion
         TListAgency newAgency = malloc(sizeof(TAgency));
-        if(newAgency == NULL || errno == ENOMEN){
+        if(newAgency == NULL || errno == ENOMEM){
             return 0;
         }
         newAgency->agencyName = malloc(strlen(agName)+1);
         
-        if(newAgency->agencyName == NULL || errno == ENOMEN){
+        if(newAgency->agencyName == NULL || errno == ENOMEM){
             return 0;
         }
 
