@@ -145,70 +145,71 @@ int addInfraction(infractionSystemADT infractionSystem, char *description, size_
     return added;
 }
 
-static void addAgencyInfraction(TAgencyInfraction * infVec, size_t * dim, char * description){
-    for(int i=0; i < *dim; i++){
-        //el tipo de infraccion ya se encontraba en el vector
-        if(strcasecmp(infVec[i].description, description) == 0){
-            infVec->fineCount++;
+static void addAgencyInfraction(TAgencyInfraction ** infVec, size_t  dim, char * description){
+    int i;
+    int flag = 1;
+    for(i=0; i < dim && flag; i++){
+        if((*infVec)[i].description == NULL){
+            flag = 0;
+        }
+        else if(strcasecmp((*infVec)[i].description, description) == 0){
+            ((*infVec)[i].fineCount)++;
             return;
         }
     }
-
-    //nuevo tipo de infraccion
-    (*dim)++;
-    errno = 0;
-    //no sabemos si hay que cambiar el realloc y hacer una variable auxiliar como para fillArr
-    infVec = realloc(infVec, sizeof(TAgencyInfraction)*(*dim));
-
-    if(infVec == NULL || errno == ENOMEM){
-        return ;
-    }
-
-    infVec[*dim-1].description = malloc(strlen(description)+1);
+    i--;
+    (*infVec)[i].description = malloc(strlen(description)+1);
     //Podriamos directamente hacer que el puntero apunte a description en la lista de infracciones
-    if(infVec[*dim-1].description == NULL || errno == ENOMEM){
-        return ;
+    if((*infVec)[i].description == NULL || errno == ENOMEM){
+        return;
     }
 
-    strcpy(infVec[*dim-1].description, description);
-    infVec[*dim-1].fineCount = 1;
+    strcpy((*infVec)[i].description, description);
+    (*infVec)[i].fineCount = 1;
+    return;
 }
 
 
-static TListAgency addAgencyRec(TListAgency list, char * agName, char * description){
+static TListAgency addAgencyRec(TListAgency list, char * agName, char * description,size_t dim,size_t *added){
     int c;
     errno = 0;
-    if(list == NULL || (c = strcasecmp(list->agencyName, agName) > 0)){
+    if(list == NULL || (c = strcasecmp(list->agencyName, agName)) > 0){
         //si la agencia no estaba tampoco habia ninguna infraccion
         TListAgency newAgency = malloc(sizeof(TAgency));
         if(newAgency == NULL || errno == ENOMEM){
             return 0;
         }
         newAgency->agencyName = malloc(strlen(agName)+1);
-        
+
         if(newAgency->agencyName == NULL || errno == ENOMEM){
             return 0;
         }
-
         strcpy(newAgency->agencyName, agName);
-        addAgencyInfraction(newAgency->infractions, &(newAgency->dimInfractions), description);
+        newAgency->infractions = calloc(dim,sizeof(TAgency));
+        addAgencyInfraction(&(newAgency->infractions), dim, description);
         newAgency->tail = list;
+        *added = 1;
         return newAgency;
     }
 
     if(c==0){
-        addAgencyInfraction(list->infractions, &(list->dimInfractions), description);
+        *added = 2;
+        addAgencyInfraction(&(list->infractions), dim, description);
         return list;
     }
 
-    list->tail = addAgencyRec(list->tail, agName, description);
+    list->tail = addAgencyRec(list->tail, agName, description,dim,added);
     return list;
 
 }
 
-void addAgency(infractionSystemADT infractionSystem, char * agency, char * description){
-    infractionSystem->firstAgency = addAgencyRec(infractionSystem->firstAgency, agency, description);
+//0 si no agrego, 1 si agrego una nueva agencia, 2 si la agencia ya estaba
+int addAgency(infractionSystemADT infractionSystem, char * agency, char * description){
+    size_t added = 0;
+    infractionSystem->firstAgency = addAgencyRec(infractionSystem->firstAgency, agency, description,infractionSystem->dim,&added);
+    return added;
 }
+
 
 //Si encuentra el id en el vector devuelve el puntero sino devuelve NULL. HACERLA ITERATIVA.
 
