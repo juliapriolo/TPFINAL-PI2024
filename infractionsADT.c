@@ -75,10 +75,9 @@ void addAgency(infractionSystemADT infractionSystem, char * agency, char * descr
 
 typedef struct tickets{
     char *plate;
-    //char *issuingAgency;
+    char *issuingAgency;
     char *issueDate; //Ver bien el tipo de dato
     size_t infractionId;
-    size_t infractionAmount; //cantidad de infracciones para la patente
     struct tickets *tail;
 }TTickets;
 
