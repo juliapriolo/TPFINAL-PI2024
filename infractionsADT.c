@@ -225,6 +225,6 @@ static TListInfractions binarySearch(TId arr, size_t id, size_t left, size_t rig
     si la patente no se encuentra entonces la añade de forma alfabetica, sino, aumenta el contador de multas para dicha patente. En ambos casos retorna 1.
 */
 
-int addTicket(TListInfractions infractions,size_t id,size_t fineCount ,char *plate){
+int addTicket(infractionSystemADT infractionSystem,size_t id,size_t fineCount ,char *plate){
     size_t added = 0;
 }
