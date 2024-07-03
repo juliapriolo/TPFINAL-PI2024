@@ -29,7 +29,7 @@ int addAgency(infractionSystemADT infractionSystem, char * agency, char * descri
     Si es valido y la patente no se encuentra entonces la añade de forma alfabetica, sino,
     aumenta el contador de multas para dicha patente. En ambos casos retorna 1.
 */
-int addTicket(infractionSystemADT infractionSystem,size_t id,size_t fineCount ,char *plate);
+int addTicket(infractionSystemADT infractionSystem, size_t id, size_t fineCount, char *plate);
 
 typedef struct query1{
     char * infraction;               //nombre de la infraccion

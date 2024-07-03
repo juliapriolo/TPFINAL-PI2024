@@ -251,3 +251,18 @@ static TListTickets addTicketRec(TListTickets listTick, char *plate, int *added)
     listTick->tail = addTicketRec(listTick->tail, plate, added);
     return listTick;
 }
+
+int addTicket(infractionSystemADT infractionSystem, size_t id, size_t fineCount, char *plate){
+    if(infractionSystem->arrId == NULL || infractionSystem->dim <= id){
+        return 0;
+    }
+    for(size_t i = 0; i < infractionSystem->dim; i++){
+        if(infractionSystem->arrId[i].id == id){
+            int flag = 0;
+            infractionSystem->arrId[i].pNode->firstTicket = addTicketRec(infractionSystem->arrId[i].pNode->firstTicket, plate, &flag);
+            infractionSystem->arrId[i].pNode->totalFines += flag;
+            return 1;
+        }
+    }
+    return 0;
+}
