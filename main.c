@@ -11,7 +11,7 @@
 #define MAX_LINE 100
 
 int readId (FILE * file, int id, int infraction, infractionSystemADT infractionSystem);     //Funcion para leer archivos csv
-
+FILE *newCSV(const char *fileName, char *header);   //funcion que crea un nuevo archivo csv y verifica que se haya creado bien
 
 
 //los parametros id e station son el numero de columna que se quiere leer en el archivo csv!!
@@ -45,3 +45,19 @@ int readId ( FILE * file, int id, int infraction, infractionSystemADT infraction
     return (ok == 0);
 }
         
+//el header se pasa por parametro y dependiendo del query uso el respectivo header del define
+FILE *newCSV(const char *fileName, char *header){
+    FILE *file=fopen(fileName, "w");
+    errno=0;
+    if(file==NULL){
+        perror("Error al abrir el archivo\n");
+        return NULL;
+    }
+    if(errno==ENOMEM){
+        perror("Error al abrir el archivo\n");
+        fclose(file);
+        return NULL;
+    }
+    fprintf(file, "%s\n", header);
+    return file;
+}
