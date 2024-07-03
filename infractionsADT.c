@@ -211,10 +211,20 @@ int addAgency(infractionSystemADT infractionSystem, char * agency, char * descri
 }
 
 
-//Si encuentra el id en el vector devuelve el puntero sino devuelve NULL. HACERLA ITERATIVA.
-
 static TListInfractions binarySearch(TId *arr, size_t id, size_t left, size_t right){
-
+    while(left <= right){
+        size_t mid = left + (right - left)/2;
+        if(arr[mid].id == id){
+            return arr[mid].pNode;
+        }
+        if(arr[mid].id < id){
+            left = mid + 1;
+        }
+        else{
+            right = mid - 1;
+        }
+    }
+    return NULL;
 }
 
 /*
