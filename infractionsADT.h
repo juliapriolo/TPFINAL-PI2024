@@ -22,7 +22,7 @@ int addInfraction(infractionSystemADT infractionSystem,char *description,size_t 
     Añade las agencias en orden alfabetico o agrega una infraccion si la agencia ya se encontraba en la lista.
     Almacena en un vector de estructuras el tipo de infraccion y la cantidad de multas de dicha infraccion.
 */
-void addAgency(infractionSystemADT infractionSystem, char * agency, char * description);
+int addAgency(infractionSystemADT infractionSystem, char * agency, char * description);
 
 /*
     Buscar en el vector de ids si el id que le pasan es valido, si no es valido retorna 0.
