@@ -12,7 +12,7 @@
 
 int readId (FILE * file, int id, int infraction, infractionSystemADT infractionSystem);     //Funcion para leer archivos csv
 FILE *newCSV(const char *fileName, char *header);   //funcion que crea un nuevo archivo csv y verifica que se haya creado bien
-
+void closeCSV(FILE *files[], int fileQuantity); //funcion que cierra los archivos csv
 
 //los parametros id e station son el numero de columna que se quiere leer en el archivo csv!!
 //Hay que ver si estamos manejando bien la memoria
@@ -60,4 +60,11 @@ FILE *newCSV(const char *fileName, char *header){
     }
     fprintf(file, "%s\n", header);
     return file;
+}
+
+void closeCSV(FILE *files[], int fileQuantity){
+    for(int i=0;i<fileQuantity;i++){
+        if(files[i]!=NULL)
+            fclose(files[i]);
+    }
 }
