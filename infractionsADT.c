@@ -91,7 +91,8 @@ infractionSystemADT newInfractionSystem(size_t minYear, size_t maxYear){
     return newSystem;
 }
 
-
+//si a>b devuelve un numero mayor a 0, si a<b,, devuelve un numero 
+//menor a 0, y si son iguales devuelve 0
 static int cmpIds(const void *a, const void *b){
     const TId *idA = (const TId *)a;
     const TId *idB = (const TId *)b;
@@ -100,12 +101,16 @@ static int cmpIds(const void *a, const void *b){
 
 
 static TId *fillArr(TId *array, size_t dim, TListInfractions pInfraction){
-    array  = realloc(array,sizeof(*array) * dim);
+    TId *newArray  = realloc(array,sizeof(*array) * dim);
     //chequear realloc
-    array[dim-1].pNode = pInfraction;
-    array[dim-1].id = pInfraction->id;
-    qsort(array, dim, sizeof(TId), cmpIds);
-    return array;
+    if(newArray==NULL){
+        free(array);
+        return NULL;
+    }
+    newArray[dim-1].pNode = pInfraction;
+    newArray[dim-1].id = pInfraction->id;
+    qsort(newArray, dim, sizeof(TId), cmpIds);
+    return newArray;
 }
 
 static TListInfractions addInfractionRec(TListInfractions list, char *description, size_t id, size_t *added, TListInfractions *pInfractions){
