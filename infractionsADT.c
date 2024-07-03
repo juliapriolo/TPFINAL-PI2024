@@ -234,7 +234,7 @@ static TListInfractions binarySearch(TId *arr, size_t id, size_t left, size_t ri
     si la patente no se encuentra entonces la añade de forma alfabetica, sino, aumenta el contador de multas para dicha patente. En ambos casos retorna 1.
 */
 
-static TListTickets addTicketRec(TListTickets listTick, char *plate, int *added){
+static TListTickets addTicketRec(TListTickets listTick, char *plate, size_t *added){
     int c;
     if(listTick == NULL || (c = strcasecmp(plate, listTick->plate)) < 0 ){
         errno = 0;
@@ -242,7 +242,7 @@ static TListTickets addTicketRec(TListTickets listTick, char *plate, int *added)
         if(aux == NULL || errno == ENOMEM){
             return NULL;
         }
-        aux->plate = malloc(((strlen(plate)) + 1) * sizeof(char));
+        aux->plate = malloc(((strlen(plate)) + 1));
         if(aux->plate == NULL || errno == ENOMEM){
             free(aux);
             return NULL;
@@ -262,17 +262,16 @@ static TListTickets addTicketRec(TListTickets listTick, char *plate, int *added)
     return listTick;
 }
 
-int addTicket(infractionSystemADT infractionSystem, size_t id, size_t fineCount, char *plate){
-    if(infractionSystem->arrId == NULL || infractionSystem->dim <= id){
-        return 0;
+int addTicket(infractionSystemADT infractionSystem, size_t id,char *plate){
+    size_t added = 0;
+    if(infractionSystem->arrId == NULL){
+        return added;
     }
-    for(size_t i = 0; i < infractionSystem->dim; i++){
-        if(infractionSystem->arrId[i].id == id){
-            int flag = 0;
-            infractionSystem->arrId[i].pNode->firstTicket = addTicketRec(infractionSystem->arrId[i].pNode->firstTicket, plate, &flag);
-            infractionSystem->arrId[i].pNode->totalFines += flag;
-            return 1;
-        }
+    TListInfractions ticket = binarySearch(infractionSystem->arrId,id,0,infractionSystem->dim-1);
+    printf("Agregando ticket de id: %ld\n",ticket->id);
+    if(ticket != NULL){
+        ticket->firstTicket = addTicketRec(ticket->firstTicket,plate,&added);
+        ticket->totalFines += added;
     }
-    return 0;
+    return added;
 }
