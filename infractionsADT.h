@@ -1,12 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 
 typedef struct infractionSystemCDT * infractionSystemADT;
 
 infractionSystemADT newInfractionSystem(size_t minYear, size_t maxYear);
-
+int addInfraction(infractionSystemADT infractionSystem,char *description,size_t id);
 void addAgency(infractionSystemADT infractionSystem, char * agency, char * description);
 
 typedef struct query1{
