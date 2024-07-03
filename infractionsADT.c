@@ -7,6 +7,14 @@
 #define MONTHS 12
 #define MAX_AG 30 //Despues cambiar el valor al que deberia ser
 
+typedef struct tickets{
+    char *plate;
+    size_t fineCount;
+    struct tickets *tail;
+}TTickets;
+
+typedef TTickets *TListTickets;
+
 typedef struct infractions{
     char *description;
     size_t id;
@@ -15,7 +23,7 @@ typedef struct infractions{
     TListTickets firstTicket;
 }TInfractions;
 
-typedef struct infractions *TListInfractions;
+typedef TInfractions *TListInfractions;
 
 typedef struct query2{
     char *description;
@@ -29,20 +37,12 @@ typedef struct agency{
     struct agency *tail;
 }TAgency;
 
-typedef struct agency *TListAgency;
+typedef TAgency *TListAgency;
 
 typedef struct id{
     size_t id;
     TListInfractions pNode;
 }TId;
-
-typedef struct tickets{
-    char *plate;
-    size_t fineCount;
-    struct tickets *tail;
-}TTickets;
-
-typedef struct tickets *TListTickets;
 
 typedef struct infractionSystemCDT{
     TListInfractions firstInfraction;
@@ -57,17 +57,37 @@ typedef struct infractionSystemCDT{
 
 
 infractionSystemADT newInfractionSystem(size_t minYear, size_t maxYear){
-        infractionSystemADT newSystem = calloc(1,sizeof(infractionSystemCDT));
+    if(minYear > maxYear){
+        return NULL;
+    }
+    size_t newDim = maxYear - minYear + 1;
+    infractionSystemADT newSystem = calloc(1,sizeof(infractionSystemCDT));
         
-        errno = 0;
-        if(newSystem == NULL || errno == ENOMEM){
-            return NULL;
-        }       
-        
-        newSystem->minYear = minYear;
-        newSystem->maxYear = maxYear;
+    //estan seguros que hay que usar errno? en los ejemplos de la guia lo hacian asi y listo
+    /*
+    if(newSystem == NULL){ //
+        return NULL o exit(1);
+    }
+    */
+   
+    errno = 0;
+    if(newSystem == NULL || errno == ENOMEM){
+        return NULL;
+    }  
 
-        return newSystem;
+    newSystem->arrYears = malloc(newDim * sizeof(size_t *)); // me tira que tiene que ser modifiale lvalue no se xq
+    if(newSystem->arrYears == NULL){
+        free(newSystem);
+        return NULL; // o exit(1)
+    }
+    for(size_t i = 0; i < newDim; i++){
+        newSystem->arrYears[i] = NULL; // inicializo cada puntero a NULL
+    }         
+        
+    newSystem->minYear = minYear;
+    newSystem->maxYear = maxYear;
+
+    return newSystem;
 }
 
 
@@ -83,13 +103,13 @@ static TId *fillArr(TId *array, size_t dim, TListInfractions pInfraction){
     //chequear realloc
     array[dim-1].pNode = pInfraction;
     array[dim-1].id = pInfraction->id;
-    qsort(array,dim,sizeof(TId),cmpIds);
+    qsort(array, dim, sizeof(TId), cmpIds);
     return array;
 }
 
-static TListInfractions addInfractionRec(TListInfractions list,char *description,size_t id,size_t *added,TListInfractions *pInfractions){
+static TListInfractions addInfractionRec(TListInfractions list, char *description, size_t id, size_t *added, TListInfractions *pInfractions){
     int c;
-    if(list == NULL || (c = strcasecmp(list->description,description)) > 0){
+    if(list == NULL || (c = strcasecmp(list->description, description)) > 0){
         TListInfractions newNode = malloc(sizeof(TInfractions));
         newNode->description = malloc(strlen(description) + 1);
         //Verificar que los malloc hayan funcionado
@@ -108,14 +128,14 @@ static TListInfractions addInfractionRec(TListInfractions list,char *description
     return list;
 }
 
-int addInfraction(infractionSystemADT infractionSystem,char *description,size_t id){
+int addInfraction(infractionSystemADT infractionSystem, char *description, size_t id){
     size_t added = 0; // flag para saber si agrego la infraccion
     TListInfractions pInfractions; // variable con los datos del nodo agregado
-    infractionSystem->firstInfraction = addInfractionRec(infractionSystem->firstInfraction,description,id,&added,&pInfractions);
+    infractionSystem->firstInfraction = addInfractionRec(infractionSystem->firstInfraction, description, id, &added, &pInfractions);
 
     if(added){
         infractionSystem->dim++;
-        infractionSystem->arrId = fillArr(infractionSystem->arrId,infractionSystem->dim,pInfractions);
+        infractionSystem->arrId = fillArr(infractionSystem->arrId, infractionSystem->dim, pInfractions);
     }
 
     return added;
