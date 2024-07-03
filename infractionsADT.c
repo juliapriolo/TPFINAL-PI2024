@@ -203,7 +203,7 @@ void addAgency(infractionSystemADT infractionSystem, char * agency, char * descr
 static TListTickets addTicketRec(TListTickets list, char *patente, char *agency, int *flag, size_t infractionId){
     if(list==NULL || list->infractionAmount==0){
         TListTickets new=malloc(sizeof(TTickets));
-        new->plate=malloc(strlen(patente+1));
+        new->plate=malloc(strlen(plate+1));
         strcpy(new->plate, patente);
         //new->issuingAgency=malloc(strlen(agency+1));
         //strcpy(new->issuingAgency, agency);
@@ -212,7 +212,7 @@ static TListTickets addTicketRec(TListTickets list, char *patente, char *agency,
         *flag=1;
         return new;
     }
-    if(strcasecmp(list->plate, patente)==0){
+    if(strcasecmp(list->patente, patente)==0){
         TListTickets new=malloc(sizeof(TTickets));
         new->infractionId=infractionId;
         new->infractionAmount++;
