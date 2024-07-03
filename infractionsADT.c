@@ -33,7 +33,6 @@ typedef struct agencyInfraction{
 typedef struct agency{
     char *agencyName;
     TAgencyInfraction *infractions;
-    size_t dimInfractions;      //cantidad de tipos de infracciones por agencia
     struct agency *tail;
 }TAgency;
 
