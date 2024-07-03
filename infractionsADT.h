@@ -4,9 +4,32 @@
 
 typedef struct infractionSystemCDT * infractionSystemADT;
 
+/*
+    Crea un nuevo sistema de infracciones.
+    Recibe el rango de años necesario para el query 4.
+*/
 infractionSystemADT newInfractionSystem(size_t minYear, size_t maxYear);
+
+/*
+    Añade las infracciones en orden alfabetico sin repetidos. 
+    Guarda los valores de id y el tipo de infraccion.
+    Inicializa en NULL la lista para las patentes que cometieron la infraccion.
+    Retorna 1 si la agrego o 0 si no.
+*/
 int addInfraction(infractionSystemADT infractionSystem,char *description,size_t id);
+
+/*
+    Añade las agencias en orden alfabetico o agrega una infraccion si la agencia ya se encontraba en la lista.
+    Almacena en un vector de estructuras el tipo de infraccion y la cantidad de multas de dicha infraccion.
+*/
 void addAgency(infractionSystemADT infractionSystem, char * agency, char * description);
+
+/*
+    Buscar en el vector de ids si el id que le pasan es valido, si no es valido retorna 0.
+    Si es valido y la patente no se encuentra entonces la añade de forma alfabetica, sino,
+    aumenta el contador de multas para dicha patente. En ambos casos retorna 1.
+*/
+int addTicket(TListInfractions infractions,size_t id,size_t fineCount ,char *plate);
 
 typedef struct query1{
     char * infraction;               //nombre de la infraccion
