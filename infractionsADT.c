@@ -25,14 +25,14 @@ typedef struct infractions{
 
 typedef TInfractions *TListInfractions;
 
-typedef struct query2{
+typedef struct agencyInfraction{
     char *description;
     size_t fineCount; // por agencia
-}TQuery2;
+}TAgencyInfraction;
 
 typedef struct agency{
     char *agencyName;
-    TQuery2 *infractions;
+    TAgencyInfraction *infractions;
     size_t dimInfractions;      //cantidad de tipos de infracciones por agencia
     struct agency *tail;
 }TAgency;
@@ -146,7 +146,7 @@ int addInfraction(infractionSystemADT infractionSystem, char *description, size_
     return added;
 }
 
-static void addAgencyInfraction(TQuery2 * infVec, size_t * dim, char * description){
+static void addAgencyInfraction(TAgencyInfraction * infVec, size_t * dim, char * description){
     for(int i=0; i < *dim; i++){
         //el tipo de infraccion ya se encontraba en el vector
         if(strcasecmp(infVec[i].description, description) == 0){
@@ -159,7 +159,7 @@ static void addAgencyInfraction(TQuery2 * infVec, size_t * dim, char * descripti
     (*dim)++;
     errno = 0;
     //no sabemos si hay que cambiar el realloc y hacer una variable auxiliar como para fillArr
-    infVec = realloc(infVec, sizeof(TQuery2)*(*dim));
+    infVec = realloc(infVec, sizeof(TAgencyInfraction)*(*dim));
 
     if(infVec == NULL || errno == ENOMEM){
         return ;
