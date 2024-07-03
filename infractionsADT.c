@@ -214,7 +214,7 @@ TListTickets addTicketRec(TListTickets list, char *plate, size_t *added){
 
 //Si encuentra el id en el vector devuelve el puntero sino devuelve NULL. HACERLA ITERATIVA.
 
-static TListInfractions binarySearch(TId arr, size_t id, size_t left, size_t right){
+static TListInfractions binarySearch(TId *arr, size_t id, size_t left, size_t right){
 
 }
 
