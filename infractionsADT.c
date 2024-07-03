@@ -101,16 +101,15 @@ static int cmpIds(const void *a, const void *b){
 
 
 static TId *fillArr(TId *array, size_t dim, TListInfractions pInfraction){
-    TId *newArray  = realloc(array,sizeof(*array) * dim);
-    //chequear realloc
-    if(newArray==NULL){
-        free(array);
+    array  = realloc(array,sizeof(*array) * dim);
+    errno=0;
+    if(array==NULL || errno==ENOMEM){
         return NULL;
     }
-    newArray[dim-1].pNode = pInfraction;
-    newArray[dim-1].id = pInfraction->id;
-    qsort(newArray, dim, sizeof(TId), cmpIds);
-    return newArray;
+    array[dim-1].pNode = pInfraction;
+    array[dim-1].id = pInfraction->id;
+    qsort(array, dim, sizeof(TId), cmpIds);
+    return array;
 }
 
 static TListInfractions addInfractionRec(TListInfractions list, char *description, size_t id, size_t *added, TListInfractions *pInfractions){
@@ -157,19 +156,19 @@ static void addAgencyInfraction(TQuery2 * infVec, size_t * dim, char * descripti
     }
 
     //nuevo tipo de infraccion
-    *dim += 1;
+    (*dim)++;
     errno = 0;
-
+    //no sabemos si hay que cambiar el realloc y hacer una variable auxiliar como para fillArr
     infVec = realloc(infVec, sizeof(TQuery2)*(*dim));
 
     if(infVec == NULL || errno == ENOMEM){
-        return 0;
+        return ;
     }
 
     infVec[*dim-1].description = malloc(strlen(description)+1);
     //Podriamos directamente hacer que el puntero apunte a description en la lista de infracciones
     if(infVec[*dim-1].description == NULL || errno == ENOMEM){
-        return 0;
+        return ;
     }
 
     strcpy(infVec[*dim-1].description, description);
@@ -192,7 +191,7 @@ static TListAgency addAgencyRec(TListAgency list, char * agName, char * descript
             return 0;
         }
 
-        newAgency->agencyName = strncpy(newAgency->agencyName, description, MAX_AG);
+        strcpy(newAgency->agencyName, agName);
         addAgencyInfraction(newAgency->infractions, &(newAgency->dimInfractions), description);
         newAgency->tail = list;
         return newAgency;
