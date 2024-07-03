@@ -52,7 +52,7 @@ typedef struct infractionSystemCDT{
     size_t maxYear;
     TId *arrId; // vector con los id ordenados
     size_t dim; //dimension total
-    size_t size; //espacio ocupado
+    size_t size; //espacio ocupado (Creo que no va a hacer falta)
 }infractionSystemCDT;
 
 
@@ -141,7 +141,7 @@ static void addAgencyInfraction(TQuery2 * infVec, size_t * dim, char * descripti
     }
 
     infVec[*dim-1].description = malloc(strlen(description)+1);
-
+    //Podriamos directamente hacer que el puntero apunte a description en la lista de infracciones
     if(infVec[*dim-1].description == NULL || errno == ENOMEM){
         return 0;
     }
@@ -186,3 +186,24 @@ void addAgency(infractionSystemADT infractionSystem, char * agency, char * descr
     infractionSystem->firstAgency = addAgencyRec(infractionSystem->firstAgency, agency, description);
 }
 
+
+TListTickets addTicketRec(TListTickets list, char *plate, size_t *added){
+
+}
+
+//Si encuentra el id en el vector devuelve el puntero sino devuelve NULL. HACERLA ITERATIVA.
+
+static TListInfractions binarySearch(TId arr, size_t id, size_t left, size_t right){
+
+}
+
+/*
+    Buscar en el vector de ids si el id que le pasan es valido, lo busca con busqueda binaria.
+    Si no es valido retorna 0.
+    Si es valido, usa el puntero que se encuentra en el vector para acceder al first correspondiente. A partir de ahi,
+    si la patente no se encuentra entonces la añade de forma alfabetica, sino, aumenta el contador de multas para dicha patente. En ambos casos retorna 1.
+*/
+
+int addTicket(TListInfractions infractions,size_t id,size_t fineCount ,char *plate){
+    size_t added = 0;
+}
