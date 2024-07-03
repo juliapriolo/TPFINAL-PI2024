@@ -4,7 +4,7 @@
 #include <errno.h>
 #include "infractionsADT.h"
 
-#define MONTHS 12
+#define MONTHS 13
 #define MAX_AG 30 //Despues cambiar el valor al que deberia ser
 
 typedef struct tickets{
@@ -47,7 +47,7 @@ typedef struct id{
 typedef struct infractionSystemCDT{
     TListInfractions firstInfraction;
     TListAgency firstAgency;
-    size_t *arrYears[MONTHS]; //vector de años y meses (multas)
+    size_t **arrYears; //vector de años y meses (multas)
     size_t minYear; //años para la query 4
     size_t maxYear;
     TId *arrId; // vector con los id ordenados
@@ -60,28 +60,29 @@ infractionSystemADT newInfractionSystem(size_t minYear, size_t maxYear){
     if(minYear > maxYear){
         return NULL;
     }
-    size_t newDim = maxYear - minYear + 1;
-    infractionSystemADT newSystem = calloc(1,sizeof(infractionSystemCDT));
-        
-    //estan seguros que hay que usar errno? en los ejemplos de la guia lo hacian asi y listo
-    /*
-    if(newSystem == NULL){ //
-        return NULL o exit(1);
-    }
-    */
-   
-    errno = 0;
-    if(newSystem == NULL || errno == ENOMEM){
-        return NULL;
-    }  
 
-    newSystem->arrYears = malloc(newDim * sizeof(size_t *)); // me tira que tiene que ser modifiale lvalue no se xq
+    infractionSystemADT newSystem = calloc(1,sizeof(infractionSystemCDT));    
+    if(newSystem == NULL){ 
+        return NULL; //o exit(1)
+    }
+   
+    size_t newDim = maxYear - minYear + 1;
+    newSystem->arrYears = malloc(newDim * sizeof(size_t *));
     if(newSystem->arrYears == NULL){
         free(newSystem);
         return NULL; // o exit(1)
     }
+
     for(size_t i = 0; i < newDim; i++){
-        newSystem->arrYears[i] = NULL; // inicializo cada puntero a NULL
+        newSystem->arrYears[i] = calloc(MONTHS,sizeof(size_t));
+        if(newSystem->arrYears[i] == NULL){
+            for(size_t j = 0; j < i; j++){
+                free(newSystem->arrYears[j]);
+            }
+            free(newSystem->arrYears);
+            free(newSystem);
+            return NULL;
+        }
     }         
         
     newSystem->minYear = minYear;
