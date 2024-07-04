@@ -403,3 +403,160 @@ TQuery1 * query1(infractionSystemADT infractionSystem){
     }
     return ans;
 }
+
+
+//retorna -1 si no encontro el id, o la posicion del vector en el que esta sino
+static int lookForId(TId *infractions, TListAgency infPerAgency, size_t dim, int i){   //dim es la longitud del vector de infracciones
+    for(int j=0;j<dim;j++){
+        if(infPerAgency->infractions[i].id==infractions[j].id){
+            return j;
+        }
+    }
+    return -1;
+}
+
+//devuelve el nodo como un char *
+static char *fromList(int vecPos, TId *infractions){
+    errno=0;
+    if(infractions[vecPos].pNode==NULL){
+        return NULL;
+    }
+    char *ans=malloc(strlen(infractions[vecPos].pNode->description)+1);
+    if(ans==NULL || errno==ENOMEM){
+        perror("Error alocando memoria en FromList\n");
+        return NULL;
+    }
+    strcpy(ans, infractions[vecPos].pNode->description);
+    return ans;
+}
+
+//decide alfabeticamente cual infraction tengo que usar
+static char *decideWhich(char *op1, char *op2){
+    errno=0;
+    char *ans=NULL;
+    if(strcasecmp(op1, op2)>0){
+        ans=realloc(ans, strlen(op2)+1);
+        if(ans==NULL || errno==ENOMEM){
+            perror("Error alocando memoria en Decide Which\n");
+            return NULL;
+        }
+        strcpy(ans, op2);
+    }else{
+        ans=realloc(ans, strlen(op1)+1);
+        if(ans==NULL || errno==ENOMEM){
+            perror("Error alocando memoria en Decide Which\n");
+            return NULL;
+        }
+        strcpy(ans, op1);
+    }
+    return ans;
+}
+
+//se podria hacer con los iteradores tambien(consultar a los chicos que les parece mejor)
+Tquery2 *query2(infractionSystemADT infractionadt){ 
+    errno=0;
+    Tquery2 *head=calloc(1, sizeof(*head));
+    if(head==NULL || errno==ENOMEM){
+        perror("Error al almacenar memorija para el query 2\n");
+        return NULL;
+    }
+    Tquery2 *last=calloc(1, sizeof(*last));
+    if(last==NULL || errno==ENOMEM){
+        perror("Error al almacenar memorija para el query 2\n");
+        return NULL;
+    }
+    size_t max=0;
+    int vecPos=0;
+    char *agencyRta=NULL;
+    char *infraction=NULL;
+    toBeginByAgency(infractionadt);
+    while(hasNextByAgency(infractionadt)){    //no se si dejar agency->agencyName!=NULL
+        for(int i=0;i<infractionadt->iterAgency->dim;i++){ //creo que habria que agregar al struct de agency un dim para el vector de infracciones
+            if(infractionadt->iterAgency->infractions[i].fineCount>=max){
+                max=infractionadt->iterAgency->infractions[i].fineCount;
+                agencyRta=realloc(agencyRta, strlen(infractionadt->iterAgency->agencyName)+1);
+                if(agencyRta==NULL || errno==ENOMEM){
+                    perror("Error al almacenar memorija paraagencyRta\n");
+                    free(agencyRta);
+                    free(infraction);
+                    free(head);
+                    return NULL;
+                }
+                strcpy(agencyRta, infractionadt->iterAgency->agencyName);
+
+                vecPos=lookForId(infractionadt->arrId, infractionadt->iterAgency, infractionadt->dim, i);
+                char *aux=fromList(vecPos, infractionadt->arrId);
+
+                if(aux==NULL || errno==ENOMEM){
+                    free(agencyRta);
+                    free(infraction);
+                    free(head);
+                    return NULL;
+                }
+
+                if(infraction!=NULL){
+                    char *auxInf=malloc(strlen(infraction)+1);
+                    if(auxInf==NULL || errno==ENOMEM){
+                        perror("Error alocando memoria en auxInf\n");
+                        free(aux);
+                        free(agencyRta);
+                        free(infraction);
+                        free(head);
+                        return NULL;
+                    }
+
+                    strcpy(auxInf, infraction);
+                    infraction=decideWhich(aux, auxInf);
+                    free(auxInf);
+                }else{
+                    infraction=malloc(strlen(aux)+1);
+                    if(infraction==NULL || errno==ENOMEM){
+                        perror("Error alocando memoria\n");
+                        free(aux);
+                        free(agencyRta);
+                        free(head);
+                        return NULL;
+                    }
+                    strcpy(infraction, aux);
+                }
+                free(aux);
+            }
+        }
+        Tquery2 *new=calloc(1, sizeof(*new));
+        if(new==NULL || errno==ENOMEM){
+            perror("Error alocando memoria en new\n");
+            return NULL;
+        }
+        new->agency=realloc(new->agency, strlen(agencyRta)+1);
+        if(new->agency==NULL || errno==ENOMEM){
+            perror("Error alocando memoria en query2-agency\n");
+            free(agencyRta);
+            free(infraction);
+            free(head);
+            return NULL;
+        }
+        strcpy(new->agency, agencyRta);
+
+        new->infraction=realloc(new->infraction, strlen(infraction)+1);
+        if(new->infraction==NULL || errno==ENOMEM){
+            perror("Error alocando memoria en query2-infraction\n");
+            return NULL;
+        }
+        strcpy(new->infraction, infraction);
+    
+        new->totalInfractions=max;
+
+        new->tail=NULL;
+
+        if(head==NULL){
+            head=new;
+        }else{
+            last->tail=new;
+        }
+        last=new;
+
+        nextByAgency(infractionadt);  //agency=agency->tail;
+    }
+
+    return head;
+}
