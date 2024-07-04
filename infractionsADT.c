@@ -305,3 +305,56 @@ char *nextByAgency(infractionSystemADT a){
     a->iterAgency=a->iterAgency->tail;
     return ans;
 }
+
+
+//QUERY 1: Total de multas por infraccion.
+
+static TListQ1 addRecQ1(TListQ1 list, char * infractionName, size_t total){
+    int c;
+    if(list == NULL || (c = list->totalInfracctions - total) < 0 || (c == 0 && strcmp(list->infraction, infractionName) > 0)){
+        TListQ1 newNode = malloc(sizeof(TNodeQ1));
+        
+        if(newNode == NULL || errno == ENOMEM){                 //Chequeo de memoria
+            return NULL;
+        }
+        newNode->infraction = malloc(strlen(infractionName)+1);
+        if(newNode->infraction == NULL){
+            free(newNode);
+            return NULL;
+        }
+        strcpy(newNode->infraction, infractionName);
+        newNode->totalInfracctions = total;
+        newNode->tail = list;
+        return newNode;
+    }
+    list->tail = addRecQ1(list->tail, infractionName, total);
+    return list;
+}
+
+static char * getInfName(infractionSystemADT infractionSystem){
+    if(!hasNext(infractionSystem)){
+        return 0;
+    }
+    return infractionSystem->iterInfractions->description;
+}
+
+
+TQuery1 * query1(infractionSystemADT infractionSystem){
+    size_t total;
+    errno = 0;
+
+    TQuery1 * ans = calloc(1, sizeof(TQuery1));
+    if(ans == NULL || errno == ENOMEM){
+        return NULL;
+    }
+
+    toBegin(infractionSystem);          //inicializa el iterador de lista de infracciones
+
+    while(hasNext(infractionSystem)){
+        total = infractionSystem->iterInfractions->totalFines;
+        char *infName = getInfName(infractionSystem);
+        ans->first = addRecQ1(ans->first, infName, total);
+        next(infractionSystem);
+    }
+    return ans;
+}

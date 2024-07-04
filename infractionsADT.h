@@ -31,11 +31,19 @@ int addAgency(infractionSystemADT infractionSystem, char * agency, size_t id);
 */
 int addTicket(infractionSystemADT infractionSystem, size_t id, char *plate);
 
-typedef struct query1{
-    char * infraction;               //nombre de la infraccion
-    size_t totalInfracctions;        //cantidad de infracciones;
-    struct query1 * tail;            //proxima infraccion
-}Tquery1;
+//Estructura para Query 1
+typedef struct nodeQuery1{
+    char * infraction;                  //nombre de la infraccion
+    size_t totalInfracctions;           //cantidad de infracciones;
+    struct nodeQuery1 * tail;           //proxima infraccion
+}TNodeQ1;
+
+typedef TNodeQ1 * TListQ1;
+
+typedef struct TQuery1{
+    TListQ1 first;
+    TListQ1 iter;
+}TQuery1;
 
 typedef struct query2{
     char * agency;                  //nombre de la agencia emisora
