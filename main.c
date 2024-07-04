@@ -16,38 +16,38 @@ FILE *newCSV(const char *fileName, char *header);   //funcion que crea un nuevo 
 void closeCSV(FILE *files[], int fileQuantity); //funcion que cierra los archivos csv
 
 
-int readId(FILE *file, int id, int infraction, infractionSystemADT infractionSystem){
-    char line[MAX_LINE];
-    int ok = 0, infractionId, i = 0;
+int readInfraction(FILE *file, int idColumn, int infractionColumn, infractionSystemADT infractionSystem){
+    char currentLine[MAX_LINE];
+    int succed = 0;
 
-    fgets(line, MAX_LINE, file);                                    // Descartar la línea de títulos
+    fgets(currentLine, MAX_LINE, file);
 
-    while (fgets(line, MAX_LINE, file) != NULL) {
-        i = 0;
-        infractionId = 0;
-        char *infractionType = NULL;
+    while (fgets(currentLine, MAX_LINE, file) != NULL) {
+        int columnIdx = 0;
+        int id = 0;
+        char *infraction = NULL;
         
-        char *token = strtok(line, DELIMITER);                    // Separar la línea en tokens usando el delimitador
+        char *token = strtok(currentLine, DELIMITER);
 
         while (token != NULL) {
-            if (i == id) {
-                infractionId = atoi(token);
-            } else if (i == infraction){
-                infractionType = token;
+            if (columnIdx == idColumn) {
+                id = atoi(token);
+            } else if (columnIdx == infractionColumn){
+                infraction = token;
             }
             token = strtok(NULL, DELIMITER);
-            i++;
+            columnIdx++;
         }
 
-        if (infractionType != NULL) {
-            ok = addInfraction(infractionSystem, infractionType, infractionId);
+        if (infraction != NULL) {
+            succed = addInfraction(infractionSystem, infraction, id);
 
-            if (!ok) {
-                printf("Error al agregar infracción: %s\n", infractionType);              
+            if (!succed) {
+                printf("Error al agregar infracción: %s\n", infraction);    //CAMBIAR      
             }
         }
     }
-    return ok;
+    return succed;
 }
 
 
