@@ -298,7 +298,7 @@ int hasNextByAgency(infractionSystemADT a){
     return a->iterAgency!=NULL;
 }
 
-void *nextByAgency(infractionSystemADT a){
+char *nextByAgency(infractionSystemADT a){
     if(!hasNextByAgency(a))
         exit(1);
     char *ans=a->iterAgency->agencyName;
