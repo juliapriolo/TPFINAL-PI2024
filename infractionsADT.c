@@ -26,7 +26,7 @@ typedef struct infractions{
 typedef TInfractions *TListInfractions;
 
 typedef struct agencyInfraction{
-    char *description;
+    size_t id;
     size_t fineCount; // por agencia
 }TAgencyInfraction;
 
@@ -145,32 +145,25 @@ int addInfraction(infractionSystemADT infractionSystem, char *description, size_
     return added;
 }
 
-static void addAgencyInfraction(TAgencyInfraction ** infVec, size_t  dim, char * description){
+static void addAgencyInfraction(TAgencyInfraction ** infVec, size_t  dim, size_t id){
     int i;
     int flag = 1;
     for(i=0; i < dim && flag; i++){
-        if((*infVec)[i].description == NULL){
+        if((*infVec)[i].id == 0){
+            (*infVec)[i].fineCount = 1;
+            (*infVec)[i].id = id;
             flag = 0;
         }
-        else if(strcasecmp((*infVec)[i].description, description) == 0){
+        else if((*infVec)[i].id == id){
             ((*infVec)[i].fineCount)++;
             return;
         }
     }
-    i--;
-    (*infVec)[i].description = malloc(strlen(description)+1);
-    //Podriamos directamente hacer que el puntero apunte a description en la lista de infracciones
-    if((*infVec)[i].description == NULL || errno == ENOMEM){
-        return;
-    }
-
-    strcpy((*infVec)[i].description, description);
-    (*infVec)[i].fineCount = 1;
     return;
 }
 
 
-static TListAgency addAgencyRec(TListAgency list, char * agName, char * description,size_t dim,size_t *added){
+static TListAgency addAgencyRec(TListAgency list, char * agName,size_t id,size_t dim,size_t *added){
     int c;
     errno = 0;
     if(list == NULL || (c = strcasecmp(list->agencyName, agName)) > 0){
@@ -185,8 +178,8 @@ static TListAgency addAgencyRec(TListAgency list, char * agName, char * descript
             return 0;
         }
         strcpy(newAgency->agencyName, agName);
-        newAgency->infractions = calloc(dim,sizeof(TAgency));
-        addAgencyInfraction(&(newAgency->infractions), dim, description);
+        newAgency->infractions = calloc(dim,sizeof(TAgencyInfraction));
+        addAgencyInfraction(&(newAgency->infractions), dim, id);
         newAgency->tail = list;
         *added = 1;
         return newAgency;
@@ -194,19 +187,19 @@ static TListAgency addAgencyRec(TListAgency list, char * agName, char * descript
 
     if(c==0){
         *added = 2;
-        addAgencyInfraction(&(list->infractions), dim, description);
+        addAgencyInfraction(&(list->infractions), dim, id);
         return list;
     }
 
-    list->tail = addAgencyRec(list->tail, agName, description,dim,added);
+    list->tail = addAgencyRec(list->tail, agName, id,dim,added);
     return list;
 
 }
 
 //0 si no agrego, 1 si agrego una nueva agencia, 2 si la agencia ya estaba
-int addAgency(infractionSystemADT infractionSystem, char * agency, char * description){
+int addAgency(infractionSystemADT infractionSystem, char * agency, size_t id){
     size_t added = 0;
-    infractionSystem->firstAgency = addAgencyRec(infractionSystem->firstAgency, agency, description,infractionSystem->dim,&added);
+    infractionSystem->firstAgency = addAgencyRec(infractionSystem->firstAgency, agency, id,infractionSystem->dim,&added);
     return added;
 }
 
