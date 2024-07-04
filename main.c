@@ -50,6 +50,54 @@ int readInfraction(FILE *file, int idColumn, int infractionColumn, infractionSys
     return succed;
 }
 
+int readTickets(FILE *file, int plateColumn, int dateColumn, int idColumn, int agencyColumn, infractionSystemADT system){
+    char currentLine[MAX_LINE];
+    int succesAgency = 0;
+    int succesPlate = 0;
+
+    fgets(currentLine, MAX_LINE, file);
+
+    while(fgets(currentLine, MAX_LINE, file) != NULL){
+        int columnIdx=0;
+        int year = 0;
+        int month = 0;
+        int id = 0;
+        char *plate = NULL;
+        char *date = NULL;
+        char *agency = NULL;
+    
+        char *token = strtok(currentLine,DELIMITER);
+
+        while(token != NULL){
+            if(columnIdx == plateColumn){
+                plate = token;
+            }else if(columnIdx == idColumn){
+                id = atoi(token);
+            }else if(columnIdx == agencyColumn){
+                agency = token;
+            }else if(columnIdx == dateColumn){
+                sscanf(token, "%d-%d", &year, &month);//PROBAR QUE FUNCIONES  
+            }
+            token = strtok(NULL,DELIMITER);
+            columnIdx++;
+        }
+        if(agency != NULL){
+            succesAgency = addAgency(system,agency,id);
+            if(!succesAgency){
+                printf("Error al agregar agencia: %s\n", agency);   //CAMBIAR         
+
+            }
+        }
+        if(plate != NULL){
+           succesPlate = addTicket(system,id,plate);
+            if(!succesPlate){
+                printf("Error al agregar patente: %s\n", plate);    //CAMBIAR     
+
+            }
+        }
+    }
+    return (succesAgency && succesPlate);
+}
 
         
 //el header se pasa por parametro y dependiendo del query uso el respectivo header del define
