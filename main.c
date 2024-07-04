@@ -14,36 +14,42 @@ int readId (FILE * file, int id, int infraction, infractionSystemADT infractionS
 FILE *newCSV(const char *fileName, char *header);   //funcion que crea un nuevo archivo csv y verifica que se haya creado bien
 void closeCSV(FILE *files[], int fileQuantity); //funcion que cierra los archivos csv
 
-//los parametros id e station son el numero de columna que se quiere leer en el archivo csv!!
-//Hay que ver si estamos manejando bien la memoria
-int readId ( FILE * file, int id, int infraction, infractionSystemADT infractionSystem ){
+
+int readId(FILE *file, int id, int infraction, infractionSystemADT infractionSystem){
     char line[MAX_LINE];
-    int ok = 0, infractionId, i=0;
+    int ok = 0, infractionId, i = 0;
 
-    fgets (line, MAX_LINE, file);                                  //Linea de titulos se descarta
+    fgets(line, MAX_LINE, file);                                    // Descartar la línea de títulos
 
-    while (fgets(line, MAX_LINE, file) != NULL){
+    while (fgets(line, MAX_LINE, file) != NULL) {
+        i = 0;
+        infractionId = 0;
+        char *infractionType = NULL;
+        
+        char *token = strtok(line, DELIMITER);                    // Separar la línea en tokens usando el delimitador
 
-        char * tok = strtok(line, DELIMITER);
-        char * infractionType ;
-
-        while (tok != NULL) {
-            if (i == infraction) {
-                infractionType = tok;
-            } else if (i == id) {
-                infractionId = atoi(tok);
+        while (token != NULL) {
+            if (i == id) {
+                infractionId = atoi(token);
+            } else if (i == infraction){
+                infractionType = token;
             }
-            tok = strtok(NULL, DELIMITER);
+            token = strtok(NULL, DELIMITER);
             i++;
         }
-        
-        if(infractionType != NULL){
+
+        if (infractionType != NULL) {
             ok = addInfraction(infractionSystem, infractionType, infractionId);
+
+            if (!ok) {
+                printf("Error al agregar infracción: %s\n", infractionType);              
+            }
         }
     }
-
-    return (ok == 0);
+    return ok;
 }
+
+
         
 //el header se pasa por parametro y dependiendo del query uso el respectivo header del define
 FILE *newCSV(const char *fileName, char *header){
