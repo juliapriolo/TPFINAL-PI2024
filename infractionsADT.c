@@ -45,6 +45,7 @@ typedef struct id{
 
 typedef struct infractionSystemCDT{
     TListInfractions firstInfraction;
+    TListInfractions iterInfractions;
     TListAgency firstAgency;
     size_t **arrYears; //vector de años y meses (multas)
     size_t minYear; //años para la query 4
@@ -266,4 +267,22 @@ int addTicket(infractionSystemADT infractionSystem, size_t id,char *plate){
         ticket->totalFines += added;
     }
     return added;
+}
+
+//funciones de iteracion para la lista de infracciones
+void toBegin(infractionSystemADT infractionSystem){
+    infractionSystem->iterInfractions = infractionSystem->firstInfraction;
+}
+
+int hasNext(infractionSystemADT infractionSystem){
+    return infractionSystem->iterInfractions != NULL;
+}
+
+void * next(infractionSystemADT infractionSystem){
+    if(!hasNext(infractionSystem)){
+        exit(1);
+    }
+    TListInfractions ans = infractionSystem->iterInfractions;
+    infractionSystem->iterInfractions = ans->tail;
+    return ans;
 }
