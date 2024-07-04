@@ -47,6 +47,7 @@ typedef struct infractionSystemCDT{
     TListInfractions firstInfraction;
     TListInfractions iterInfractions;
     TListAgency firstAgency;
+    TListAgency iterAgency;
     size_t **arrYears; //vector de años y meses (multas)
     size_t minYear; //años para la query 4
     size_t maxYear;
@@ -284,5 +285,23 @@ void * next(infractionSystemADT infractionSystem){
     }
     TListInfractions ans = infractionSystem->iterInfractions;
     infractionSystem->iterInfractions = ans->tail;
+    return ans;
+}
+
+//funciones de iteracion para las agencias
+
+void toBeginByAgency(infractionSystemADT a){
+    a->iterAgency=a->firstAgency;
+}
+
+int hasNextByAgency(infractionSystemADT a){
+    return a->iterAgency!=NULL;
+}
+
+void *nextByAgency(infractionSystemADT a){
+    if(!hasNextByAgency(a))
+        exit(1);
+    char *ans=a->iterAgency->agencyName;
+    a->iterAgency=a->iterAgency->tail;
     return ans;
 }
