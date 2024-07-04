@@ -306,6 +306,51 @@ char *nextByAgency(infractionSystemADT a){
     return ans;
 }
 
+//Funciones free
+
+static void freeTicketList(TListTickets list){
+    if(list == NULL){
+        return;
+    }
+    freeTicketList(list->tail);
+    free(list->plate);
+    free(list);
+}
+
+
+static void freeLInfractionsRec(TListInfractions list){
+    if(list == NULL){
+        return;
+    }
+    freeLInfractionsRec(list->tail);
+    freeTicketList(list->firstTicket);
+    free(list->description);
+    free(list);
+}
+
+static void freeID(TId * arreglo, size_t dim){
+    for(int i = 0; i < dim; i++){
+        free(arreglo[i]);            //nose si hay que hacer arreglo[i].id o solo arreglo[i] !!!!
+    }
+    free(arreglo);
+}
+
+static void freeArrYears(size_t **arrYears, size_t minYear, size_t maxYear) {   
+    for (size_t i = minYear; i < maxYear; i++) {
+        free(arrYears[i-minYear]);
+    }
+    
+    free(arrYears);
+}
+
+void freeInfractionSystem(infractionSystemADT infractionSystem){
+    freeLInfractionsRec(infractionSystem->firstInfraction);
+    freeLAgencyRec(infractionSystem->firstAgency);
+    freeID(infractionSystem->arrId, infractionSystem->dim);
+    freeArrYears(infractionSystem->arrYears, infractionSystem->minYear, infractionSystem->maxYear);//liberar arrYears
+    free(infractionSystem);
+}
+
 
 //QUERY 1: Total de multas por infraccion.
 
