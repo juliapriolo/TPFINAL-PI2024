@@ -99,13 +99,13 @@ typedef struct Tquery4{
 TQuery1 * query1(infractionSystemADT infractionSystem);
 
 //QUERY 2: Infraccion mas popular de cada agencia emisora, con su cantidad respectiva de multas, en orden alfabetico por agencia emisora
-TQuery2 *query2(infractionSystemADT system);
+TQuery2 *query2(infractionSystemADT infractionSystem);
 
 //QUERY 3: La cantidad mayor de multas de una patente por infraccion en orden alfabetico
 TQuery3 * query3(infractionSystemADT infractionSystem);
 
 //QUERY 4: Top 3 meses con mas multas por anio, ordenado cronologicamente por anio
-TQuery4 *query4(infractionSystemCDT *infractionSystem);
+TQuery4 *query4(infractionSystemCDT infractionSystem);
 
 //funciones iteracion y free Query1 (las vamos a necesitar para el main)
 void toBeginQ1(TQuery1 * query1);

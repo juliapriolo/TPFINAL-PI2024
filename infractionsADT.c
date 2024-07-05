@@ -275,6 +275,15 @@ int addTicket(infractionSystemADT infractionSystem, size_t id,char *plate){
     return added;
 }
 
+int addDate(infractionSystemADT system,int year,int month){
+    if(year < system->minYear || year > system->maxYear || month < 1 || month > 12){ //SACAR MAGIC NUMBERS
+        return 0;
+    }
+    system->arrYears[year-system->minYear][month-1]++;
+
+    return 1;
+}
+
 //funciones de iteracion para la lista de infracciones
 void toBegin(infractionSystemADT infractionSystem){
     infractionSystem->iterInfractions = infractionSystem->firstInfraction;
@@ -594,8 +603,6 @@ TQuery3 * query3(infractionSystemADT infractionSystem){
 }
 
 
-//QUERY 4: top 3 meses por año
-
 // Función para el query4
 TQuery4 *query4(infractionSystemCDT *infractionSystem) {
     if (infractionSystem == NULL || infractionSystem->arrYears == NULL) {
@@ -603,11 +610,11 @@ TQuery4 *query4(infractionSystemCDT *infractionSystem) {
     }
 
     size_t dim = infractionSystem->maxYear - infractionSystem->minYear + 1;
-    TQuery4 *ans = calloc(dim, sizeof(TQuery4));
+    TQuery4 *ans = calloc(1, sizeof(TQuery4));
+    ans->vec = calloc(dim,sizeof(*(ans->vec)));
     if (ans == NULL) {
         return NULL;
     }
-
     for (size_t i = 0; i < dim; i++) {
         char *m1 = NULL, *m2 = NULL, *m3 = NULL;
         int n1 = 0, n2 = 0, n3 = 0;
@@ -627,8 +634,8 @@ TQuery4 *query4(infractionSystemCDT *infractionSystem) {
                 n3 = current;
                 m3 = monthNames[j];
             }
+            
         }
-
         ans->vec[i].year = infractionSystem->minYear + i;
         ans->vec[i].monthTop1 = (m1 != NULL) ? copyStr(m1) : copyStr(EMPTY);
         ans->vec[i].monthTop2 = (m2 != NULL) ? copyStr(m2) : copyStr(EMPTY);
