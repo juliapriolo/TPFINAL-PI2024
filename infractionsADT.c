@@ -368,7 +368,39 @@ static char *copyStr(char *s) {
 }
 
 
-//QUERY 1: Total de multas por infraccion.
+//QUERY 1 Total de multas por infraccion.
+//funciones iteracion y free Query1 (las vamos a necesitar para el main)
+void toBeginQ1(TQuery1 * query1){
+    query1->iter = query1->first;
+}
+
+int hasNextQ1(TQuery1 * query1){
+    return query1->iter != NULL;
+}
+
+void * nextQ1(TQuery1 * query1){
+    if(!hasNextQ1(query1)){
+        return NULL;
+    }
+    TListQ1 ans = query1->iter;
+    query1->iter = query1->iter->tail;
+    return ans;
+}
+
+static void freeQ1Rec(TListQ1 listQ1){
+    if(listQ1 == NULL){
+        return;
+    }
+    freeQ1Rec(listQ1->tail);
+    free(listQ1->infraction);
+    free(listQ1);
+}
+
+
+void freeQ1(TQuery1 * query1){
+    freeQ1Rec(query1->first);
+    free(query1);
+}
 
 static TListQ1 addRecQ1(TListQ1 list, char * infractionName, size_t total){
     int c;
