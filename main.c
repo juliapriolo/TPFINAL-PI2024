@@ -11,17 +11,23 @@
 #define CANT_QUERY 4
 #define MAX_LINE 100
 
-#ifdef NY
-#define MAX_LEN_AGENCY 35 //largo maximo para una agencia en Nueva York
-#define MAX_LEN_DESCR 30 //largo maximo para el nombre de una infracción en Nueva York
-#else
-#define MAX_LEN_AGENCY 13 //largo maximo para una agencia en Chicago
-#define MAX_LEN_DESCR 50 //largo maximo para el nombre de una infraccion en Chicago
-#endif
-
-int readId (FILE * file, int id, int infraction, infractionSystemADT infractionSystem);     //Funcion para leer archivos csv
+int readInfraction(FILE *file, int idColumn, int infractionColumn, infractionSystemADT infractionSystem);
+int readTickets(FILE *file, int plateColumn, int dateColumn, int idColumn, int agencyColumn, infractionSystemADT system);
 FILE *newCSV(const char *fileName, char *header);   //funcion que crea un nuevo archivo csv y verifica que se haya creado bien
 void closeCSV(FILE *files[], int fileQuantity); //funcion que cierra los archivos csv
+
+
+int main(int argc, char *argv[]){
+
+    if(argc != 5){ //CAMBIAR
+        fprintf(stderr, "Incorrect use of %s\n",argv[0]);
+        fprintf(stderr, "Uso: %s <tickets.csv> <infractions.csv> <minYear> <maxYear>\n", argv[0]);
+        exit(1);
+    }
+
+
+    return 0;
+}
 
 
 int readInfraction(FILE *file, int idColumn, int infractionColumn, infractionSystemADT infractionSystem){
@@ -41,6 +47,10 @@ int readInfraction(FILE *file, int idColumn, int infractionColumn, infractionSys
             if (columnIdx == idColumn) {
                 id = atoi(token);
             } else if (columnIdx == infractionColumn){
+                char *newline = strchr(token,'\n'); //HACER UNA FUNCION
+                if(newline){
+                    *newline = '\0';
+                }
                 infraction = token;
             }
             token = strtok(NULL, DELIMITER);
@@ -82,6 +92,10 @@ int readTickets(FILE *file, int plateColumn, int dateColumn, int idColumn, int a
             }else if(columnIdx == idColumn){
                 id = atoi(token);
             }else if(columnIdx == agencyColumn){
+                char *newline = strchr(token,'\n');
+                if(newline){
+                    *newline = '\0';
+                }
                 agency = token;
             }else if(columnIdx == dateColumn){
                 sscanf(token, "%d-%d", &year, &month);//PROBAR QUE FUNCIONES  
@@ -127,15 +141,8 @@ FILE *newCSV(const char *fileName, char *header){
 
 void closeCSV(FILE *files[], int fileQuantity){
     for(int i=0;i<fileQuantity;i++){
-        if(files[i]!=NULL)
+        if(files[i]!=NULL){
             fclose(files[i]);
-    }
-}
-
-//funcion que cierra los archivos html que estan en el arreglo files
-void closeHTML(htmlTable files[], int fileQuantity){
-    for(int i=0;i<fileQuantity;i++){
-        if(files[i]!=NULL)
-            closeHTMLTable(files[i]);
+        }
     }
 }
