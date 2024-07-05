@@ -31,11 +31,29 @@ int addAgency(infractionSystemADT infractionSystem, char * agency, size_t id);
 */
 int addTicket(infractionSystemADT infractionSystem, size_t id, char *plate);
 
-//Estructura para Query 1
+//funciones de iteracion para la lista de infracciones
+void toBegin(infractionSystemADT infractionSystem);
+
+int hasNext(infractionSystemADT infractionSystem);
+
+void * next(infractionSystemADT infractionSystem);
+
+//funciones de iteracion para las agencias
+
+void toBeginByAgency(infractionSystemADT a);
+
+int hasNextByAgency(infractionSystemADT a);
+
+char *nextByAgency(infractionSystemADT a);
+
+//funcion free infraction
+void freeInfractionSystem(infractionSystemADT infractionSystem);
+
+//Estructuras para los queries
 typedef struct nodeQuery1{
-    char * infraction;                  //nombre de la infraccion
-    size_t totalInfracctions;           //cantidad de infracciones;
-    struct nodeQuery1 * tail;           //proxima infraccion
+    char * infraction; //nombre de la infraccion
+    size_t totalInfracctions; //cantidad de infracciones;
+    struct nodeQuery1 * tail; //proxima infraccion
 }TNodeQ1;
 
 typedef TNodeQ1 * TListQ1;
@@ -51,10 +69,6 @@ typedef struct query2{
     size_t fineCount;
 }TQuery2;
 
-TQuery2 *query2(infractionSystemADT system);
-
-//salida: nombre de la infracción;patente con la mayor cantidad de multas de esa infracción;cantidad de multas.
-//2 o más patentes con la misma cantidad de multas para una infracción → se ordena alfabéticamente
 typedef struct listQuery3{
     char * infraction; //nombre infraccion
     char * plate; //numero de patente
@@ -71,12 +85,25 @@ typedef struct query3{
 
 typedef struct nodeq4{
     size_t year;                    
-    char * monthTop1;               //mes con mayor cantidad de infracciones
-    char * monthTop2;               //mes con segunda mayor cantidad de infracciones
-    char * monthTop3;               //mes con tercera mayor cantidad de infracciones
+    char * monthTop1; //mes con mayor cantidad de infracciones
+    char * monthTop2; //mes con segunda mayor cantidad de infracciones
+    char * monthTop3; //mes con tercera mayor cantidad de infracciones
 }TNodeq4;
 
-typedef struct TQuery4{
+typedef struct Tquery4{
     TNodeq4 * vec;
     size_t dim;
-}Tquery4;
+}TQuery4;
+
+//QUERY 1: Total de multas por infraccion en forma descendente por la cantidad total de multas
+TQuery1 * query1(infractionSystemADT infractionSystem);
+
+//QUERY 2: Infraccion mas popular de cada agencia emisora, con su cantidad respectiva de multas, en orden alfabetico por agencia emisora
+TQuery2 *query2(infractionSystemADT system);
+
+//QUERY 3: La cantidad mayor de multas de una patente por infraccion en orden alfabetico
+TQuery3 * query3(infractionSystemADT infractionSystem);
+
+//QUERY 4: Top 3 meses con mas multas por anio, ordenado cronologicamente por anio
+TQuery4 *query4(infractionSystemCDT *infractionSystem);
+

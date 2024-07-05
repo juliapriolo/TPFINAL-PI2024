@@ -565,13 +565,13 @@ TQuery3 * query3(infractionSystemADT infractionSystem){
 //QUERY 4: top 3 meses por año
 
 // Función para el query4
-Tquery4 *query4(infractionSystemCDT *infractionSystem) {
+TQuery4 *query4(infractionSystemCDT *infractionSystem) {
     if (infractionSystem == NULL || infractionSystem->arrYears == NULL) {
         return NULL;
     }
 
     size_t dim = infractionSystem->maxYear - infractionSystem->minYear + 1;
-    Tquery4 *ans = calloc(dim, sizeof(Tquery4));
+    TQuery4 *ans = calloc(dim, sizeof(TQuery4));
     if (ans == NULL) {
         return NULL;
     }
