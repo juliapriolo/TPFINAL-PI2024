@@ -37,6 +37,7 @@ typedef struct agencyInfraction{
 typedef struct agency{
     char *agencyName;
     TAgencyInfraction *infractions;
+    size_t dim;
     struct agency *tail;
 }TAgency;
 
