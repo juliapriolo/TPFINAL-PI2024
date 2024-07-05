@@ -12,6 +12,15 @@
 #define CANT_QUERY 4
 #define MAX_LINE 100
 
+#define INVALID_YEAR -1
+#define ERROR 1
+#define OK 0
+
+#define MIN_YEAR 3
+#define MAX_YEAR 4
+
+//enum arguments{PROGRAM=0, NY, CHI, MIN_YEAR, MAX_YEAR};   preguntarle al resto del grupo que les parece mejor
+
 #ifdef NY
 #define MAX_LEN_AGENCY 35 //largo maximo para una agencia en Nueva York
 #define MAX_LEN_DESCR 30 //largo maximo para el nombre de una infracción en Nueva York
@@ -25,17 +34,36 @@ int readTickets(FILE *file, int plateColumn, int dateColumn, int idColumn, int a
 FILE *newCSV(const char *fileName, char *header);   //funcion que crea un nuevo archivo csv y verifica que se haya creado bien
 void closeCSV(FILE *files[], int fileQuantity); //funcion que cierra los archivos csv
 void closeHTML(htmlTable files[], int fileQuantity);    //funcion que cierra los archivos html que estan en el arreglo files
+int valid( const char* s);  //se asegura que el string sea todo de numeros
 
 
 int main(int argc, char *argv[]){
 
-    if(argc != 5){ //CAMBIAR
-        fprintf(stderr, "Incorrect use of %s\n",argv[0]);
-        fprintf(stderr, "Uso: %s <tickets.csv> <infractions.csv> <minYear> <maxYear>\n", argv[0]);
-        exit(1);
+    if(argc > 5 || argc<4){
+        fprintf(stderr, "Incorrect amount of arguments supplied\n");
+        exit(ERROR);
     }
+    int minYear, maxYear = INVALID_YEAR; //no estamos seguras si hay que inicializar el minYear o no
 
+    if ( argc >= 4 ){ //Vemos si minYear es un tipo de dato valido
+        if( !valid( argv[MIN_YEAR])){
+            fprintf( stderr, "Incorrect type for the minimum year\n");
+            exit(ERROR); //vamos a hacer los enums para los distintos tipos de errores??
+            }
+        minYear = atoi(args[MIN_YEAR]);
+    }
+    if ( cantArg == 5 ){    //Vemos si maxYear es un tipo de dato valido
+        if(!valid( args[MAX_YEAR]) ){
+            fprintf( stderr, "Incorrect type for the maximum year\n");
+            exit( ERROR);
+            }
+        maxYear = atoi(args[MAX_YEAR]);
 
+        if ( minYear > maxYear ){   //Vemos que el año minimo no sea mayor que el año maximo
+            fprintf(stderr, "Invalid: minYear can not be greater than maxYear\n");
+            exit(ERROR);
+        }
+    }
     return 0;
 }
 
@@ -163,4 +191,12 @@ void closeHTML(htmlTable files[], int fileQuantity){
         if(files[i]!=NULL)
             closeHTMLTable(files[i]);
     }
+}
+
+int valid( const char* s){
+    for ( int i =0; s[i]; i++){
+        if ( !isdigit(s[i]))
+            return 0;
+    }
+    return 1;
 }
