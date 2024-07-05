@@ -11,6 +11,14 @@
 #define CANT_QUERY 4
 #define MAX_LINE 100
 
+#ifdef NY
+#define MAX_LEN_AGENCY 35 //largo maximo para una agencia en Nueva York
+#define MAX_LEN_DESCR 30 //largo maximo para el nombre de una infracción en Nueva York
+#else
+#define MAX_LEN_AGENCY 13 //largo maximo para una agencia en Chicago
+#define MAX_LEN_DESCR 50 //largo maximo para el nombre de una infraccion en Chicago
+#endif
+
 int readId (FILE * file, int id, int infraction, infractionSystemADT infractionSystem);     //Funcion para leer archivos csv
 FILE *newCSV(const char *fileName, char *header);   //funcion que crea un nuevo archivo csv y verifica que se haya creado bien
 void closeCSV(FILE *files[], int fileQuantity); //funcion que cierra los archivos csv
@@ -121,5 +129,13 @@ void closeCSV(FILE *files[], int fileQuantity){
     for(int i=0;i<fileQuantity;i++){
         if(files[i]!=NULL)
             fclose(files[i]);
+    }
+}
+
+//funcion que cierra los archivos html que estan en el arreglo files
+void closeHTML(htmlTable files[], int fileQuantity){
+    for(int i=0;i<fileQuantity;i++){
+        if(files[i]!=NULL)
+            closeHTMLTable(files[i]);
     }
 }
