@@ -6,10 +6,10 @@
 
 #define MONTHS 12
 #define MAX_AG 30 //Despues cambiar el valor al que deberia ser
-#define DIM(x,y) (y-x)
-#define EMPTY "empty"
+#define EMPTY "EMPTY"
 
 enum Meses {Enero = 0,Febrero,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre};
+static char *monthNames[] = {"dic", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
 
 typedef struct tickets{
     char *plate;
@@ -355,6 +355,17 @@ void freeInfractionSystem(infractionSystemADT infractionSystem){
     free(infractionSystem);
 }
 
+//Funcion para copiar
+static char *copyStr(char *s) {
+    errno = 0;
+    char *ans = malloc(strlen(s) + 1);
+    if (ans == NULL || errno == ENOMEM) {
+        return NULL;
+    }
+    strcpy(ans, s);
+    return ans;
+}
+
 
 //QUERY 1: Total de multas por infraccion.
 
@@ -566,84 +577,46 @@ Tquery2 *query2(infractionSystemADT infractionadt){
 }
 
 
-static char *getMonthName(enum Meses month) {
-    switch (month) {
-        case Enero:     return "Enero";
-        case Febrero:   return "Febrero";
-        case Marzo:     return "Marzo";
-        case Abril:     return "Abril";
-        case Mayo:      return "Mayo";
-        case Junio:     return "Junio";
-        case Julio:     return "Julio";
-        case Agosto:    return "Agosto";
-        case Septiembre:return "Septiembre";
-        case Octubre:   return "Octubre";
-        case Noviembre: return "Noviembre";
-        case Diciembre: return "Diciembre";
-        default:        return "Desconocido";
-    }
-}
+//QUERY 4: top 3 meses por año
 
-
-//Query 4
-//Ver si funciona bien lo de asignar el char * directamente
-Tquery4 * query4(infractionSystemADT infractionSystem){
-    errno = 0;
-    size_t dim = DIM(infractionSystem->maxYear, infractionSystem->minYear);
-    Tquery4 * ans = calloc(dim, sizeof(Tquery4));
-    if(ans == NULL || errno == ENOMEM){
+// Función para el query4
+Tquery4 *query4(infractionSystemCDT *infractionSystem) {
+    if (infractionSystem == NULL || infractionSystem->arrYears == NULL) {
         return NULL;
     }
-    //memoria
-    char * m1 = NULL;
-    char *m2 = NULL;
-    char *m3 = NULL;
-    int n1 = 0, n2 = 0, n3 = 0;
 
-    //for para recorrer los años
-    for(size_t i = 0; i < dim; i++){
-        enum Meses currentMonth = Enero;
-        for(enum Meses j = currentMonth; j < MONTHS; j++){
-            int current = infractionSystem->arrYears[i][j];
-            if (current > n1) {
-                n3 = n2;
-                m3 = m2;
-                n2 = n1; 
-                m2 = m1;
-                n1 = current;
-                m1 = getMonthName(j);
-            } else if (current > n2) {
-                n3 = n2; 
-                m3 = m2;
-                n2 = current;
-                m2 = getMonthName(j);
-            } else if (current > n3) {
-                n3 = current;
-                m3 = getMonthName(j);
-            }
-        }
-        ans[i].year = infractionSystem->minYear + i;
-        if(m3 == NULL){
-            m3 = malloc(strlen(EMPTY));
-            m3 = EMPTY;
-            if(m2 == NULL){
-                m2 = malloc(strlen(EMPTY));
-                m2 = EMPTY;
-                if(m1 == NULL){
-                    m1 = malloc(strlen(EMPTY));
-                    m1 = EMPTY;
-                }
-            }
-        }
-        
-        ans[i].monthTop1 = copyStr(m1);
-        ans[i].monthTop2 = copyStr(m2);
-        ans[i].monthTop3 = copyStr(m3);
+    size_t dim = infractionSystem->maxYear - infractionSystem->minYear + 1;
+    Tquery4 *ans = calloc(dim, sizeof(Tquery4));
+    if (ans == NULL) {
+        return NULL;
     }
 
-    free(m1);
-    free(m2);
-    free(m3);
+    for (size_t i = 0; i < dim; i++) {
+        char *m1 = NULL, *m2 = NULL, *m3 = NULL;
+        int n1 = 0, n2 = 0, n3 = 0;
+
+        for (size_t j = 0; j < MONTHS; j++) {
+            int current = infractionSystem->arrYears[i][j];
+            if (current > n1) {
+                n3 = n2; m3 = m2;
+                n2 = n1; m2 = m1;
+                n1 = current;
+                m1 = monthNames[j];
+            } else if (current > n2) {
+                n3 = n2; m3 = m2;
+                n2 = current;
+                m2 = monthNames[j];
+            } else if (current > n3) {
+                n3 = current;
+                m3 = monthNames[j];
+            }
+        }
+
+        ans[i].year = infractionSystem->minYear + i;
+        ans[i].monthTop1 = (m1 != NULL) ? copyStr(m1) : copyStr(EMPTY);
+        ans[i].monthTop2 = (m2 != NULL) ? copyStr(m2) : copyStr(EMPTY);
+        ans[i].monthTop3 = (m3 != NULL) ? copyStr(m3) : copyStr(EMPTY);
+    }
 
     return ans;
 }

@@ -59,10 +59,14 @@ typedef struct query3{
     struct query3 * tail;
 }Tquery3;
 
-typedef struct query4{
+typedef struct nodeq4{
     size_t year;                    
     char * monthTop1;               //mes con mayor cantidad de infracciones
     char * monthTop2;               //mes con segunda mayor cantidad de infracciones
     char * monthTop3;               //mes con tercera mayor cantidad de infracciones
-}Tquery4;
+}TNodeq4;
 
+typedef struct TQuery4{
+    TNodeq4 * vec;
+    size_t dim;
+}
