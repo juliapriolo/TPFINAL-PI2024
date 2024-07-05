@@ -69,4 +69,4 @@ typedef struct nodeq4{
 typedef struct TQuery4{
     TNodeq4 * vec;
     size_t dim;
-}
+}Tquery4;
