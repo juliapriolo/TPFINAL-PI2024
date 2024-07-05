@@ -64,6 +64,5 @@ typedef struct query4{
     char * monthTop1;               //mes con mayor cantidad de infracciones
     char * monthTop2;               //mes con segunda mayor cantidad de infracciones
     char * monthTop3;               //mes con tercera mayor cantidad de infracciones
-    struct query4 * tail;
 }Tquery4;
 
