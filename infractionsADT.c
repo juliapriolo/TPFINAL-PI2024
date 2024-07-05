@@ -335,7 +335,7 @@ static void freeLInfractionsRec(TListInfractions list){
 
 static void freeID(TId * arreglo, size_t dim){
     for(int i = 0; i < dim; i++){
-        free(arreglo[i]);            //nose si hay que hacer arreglo[i].id o solo arreglo[i] !!!!
+        free(arreglo[i].pNode);            //nose si hay que hacer arreglo[i].id o solo arreglo[i] !!!!
     }
     free(arreglo);
 }
@@ -597,10 +597,10 @@ Tquery4 *query4(infractionSystemCDT *infractionSystem) {
             }
         }
 
-        ans[i].year = infractionSystem->minYear + i;
-        ans[i].monthTop1 = (m1 != NULL) ? copyStr(m1) : copyStr(EMPTY);
-        ans[i].monthTop2 = (m2 != NULL) ? copyStr(m2) : copyStr(EMPTY);
-        ans[i].monthTop3 = (m3 != NULL) ? copyStr(m3) : copyStr(EMPTY);
+        ans->vec[i].year = infractionSystem->minYear + i;
+        ans->vec[i].monthTop1 = (m1 != NULL) ? copyStr(m1) : copyStr(EMPTY);
+        ans->vec[i].monthTop2 = (m2 != NULL) ? copyStr(m2) : copyStr(EMPTY);
+        ans->vec[i].monthTop3 = (m3 != NULL) ? copyStr(m3) : copyStr(EMPTY);
     }
 
     return ans;
