@@ -577,6 +577,97 @@ Tquery2 *query2(infractionSystemADT infractionadt){
     return head;
 }
 
+//QUERY 3: Infraccion con la patente con mayor cantidad de multas
+
+
+static TListQuery3 addQuery3(TQuery3 * myQuery, size_t queryFineAmount, char ** queryPlate, char * queryInfraction, size_t queryTotalInfractions){
+    errno = 0;
+
+    TListQuery3 aux = malloc(sizeof(ListQuery3)); // quiero agregar un nodo nuevo
+    if(aux == NULL || errno == ENOMEM){
+        return NULL;
+    }
+
+    aux->infraction = malloc((strlen(queryInfraction) + 1) * sizeof(char));
+    if(aux->infraction == NULL || errno == ENOMEM){
+        free(aux);
+        return NULL;
+    }
+    strcpy(aux->infraction, queryInfraction);
+
+    aux->plate = malloc((strlen(*queryPlate) + 1) * sizeof(char));
+    if(aux->plate == NULL || errno == ENOMEM){
+        free(aux->infraction);
+        free(aux);
+        return NULL;
+    }
+    strcpy(aux->plate, *queryPlate);
+
+    aux->totalInfractions = queryTotalInfractions;
+    aux->tail = NULL;
+
+    if(myQuery->first == NULL){
+        myQuery->first = aux;
+    } else{
+        myQuery->last->tail = aux;
+    }
+    myQuery->last = aux;
+    return myQuery->first;
+}
+
+TQuery3 * query3(infractionSystemADT infractionSystem){
+    errno = 0;
+
+    TQuery3 * myQuery = calloc(1, sizeof(TQuery3));
+    if(errno == ENOMEM || myQuery == NULL){
+        return NULL;
+    }
+
+    size_t queryFinesAmount = 0; // inicializo una var temporal que la voy cambiando a medida que encuentre la patente con mas multas
+    
+    char ** queryPlate = malloc((strlen(infractionSystem->firstInfraction->firstTicket->plate) + 1) * sizeof(char *));
+    if(errno == ENOMEM || queryPlate == NULL){
+        return NULL;
+    }
+
+    char * queryInfraction = NULL;
+    size_t queryTotalInfractions = 0;
+
+    toBegin(infractionSystem); // inicializo el iterador en el primer nodo de la lista de infracciones
+    
+    while(hasNext(infractionSystem)){
+        int flag = 0; //para ver si tiene patentes, si no tiene voy a tener que frear queryInfraction;
+        queryInfraction = realloc(queryInfraction, ((strlen(infractionSystem->iterInfractions->description)+1) * sizeof(char))); //sea cual sea la cantidad, va a ser de esta infraccion
+        if(queryInfraction == NULL || errno == ENOMEM){
+            free(myQuery);
+            return NULL;
+        }
+
+        TListTickets currentTicket = infractionSystem->iterInfractions->firstTicket;
+        while(currentTicket != NULL){
+            flag = 1; //como entro al while, tiene al menos una patente
+            if(currentTicket->fineCount > queryFinesAmount){
+                queryFinesAmount = currentTicket->fineCount;
+                *queryPlate = currentTicket->plate; // me guardo en el puntero la patente asi no lo copio siempre, sino que recien lo copio cuando encontre el max de multas
+            }else if(currentTicket->fineCount == queryFinesAmount){
+                if(strcasecmp(*queryPlate, currentTicket->plate) > 0){
+                    *queryPlate = currentTicket->plate; //si plate esta antes alfabeticamente, lo quiero
+                }
+            }
+            currentTicket = currentTicket->tail;
+        }
+        if(flag == 1){
+            strcpy(queryInfraction, infractionSystem->iterInfractions->description);
+            queryTotalInfractions++; // como agregue los datos de una infraccion, ya que tenia al menos una patente, sumo a la cantidad de infracciones
+            myQuery->first = addQuery3(myQuery, queryFinesAmount, queryPlate, queryInfraction, queryTotalInfractions);
+        }
+        next(infractionSystem);
+    }
+    free(queryPlate);
+    free(queryInfraction);
+    return myQuery;
+}
+
 
 //QUERY 4: top 3 meses por año
 

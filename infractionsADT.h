@@ -52,12 +52,21 @@ typedef struct query2{
     struct query2 * tail;
 }Tquery2;
 
+//salida: nombre de la infracción;patente con la mayor cantidad de multas de esa infracción;cantidad de multas.
+//2 o más patentes con la misma cantidad de multas para una infracción → se ordena alfabéticamente
+typedef struct listQuery3{
+    char * infraction; //nombre infraccion
+    char * plate; //numero de patente
+    size_t totalInfractions; //cantidad de infracciones
+    struct listQuery3 * tail;
+}ListQuery3;
+
+typedef ListQuery3 * TListQuery3;
+
 typedef struct query3{
-    char * infraction;               //nombre infraccion
-    int plate;                      //numero de patente
-    size_t totalInfractions;          //cantidad de infracciones
-    struct query3 * tail;
-}Tquery3;
+    TListQuery3 first;
+    TListQuery3 last;
+}TQuery3;
 
 typedef struct nodeq4{
     size_t year;                    
