@@ -46,11 +46,12 @@ typedef struct TQuery1{
 }TQuery1;
 
 typedef struct query2{
-    char * agency;                  //nombre de la agencia emisora
-    char * infraction;              //infraccion mas popular
-    size_t totalInfractions;        //cantidad de infracciones
-    struct query2 * tail;
-}Tquery2;
+    char *agency;
+    char *mostPopularInf;
+    size_t fineCount;
+}TQuery2;
+
+TQuery2 *query2(infractionSystemADT system);
 
 //salida: nombre de la infracción;patente con la mayor cantidad de multas de esa infracción;cantidad de multas.
 //2 o más patentes con la misma cantidad de multas para una infracción → se ordena alfabéticamente
