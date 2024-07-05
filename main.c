@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "infractionsADT.h"
 #include <errno.h>
+#include "htmlTable.h"
 
 #define HEADER1 "infraction;tickets\n"
 #define HEADER2 "issuingAgency;infraction;tickets\n"
