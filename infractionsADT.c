@@ -667,7 +667,7 @@ TQuery4 *query4(infractionSystemCDT *infractionSystem) {
     }
     size_t dim;
     if(infractionSystem->maxYear == INVALID_YEAR){  //depende de si se recibio un maxYear o no
-        dim = CURRENT_YEAR - infractionSystem->minYear;
+        dim = CURRENT_YEAR - infractionSystem->minYear + 1;
     }else{
         dim = infractionSystem->maxYear - infractionSystem->minYear + 1;
     }
