@@ -63,18 +63,15 @@ typedef struct TQuery1{
     TListQ1 iter;
 }TQuery1;
 
+typedef struct vecQuery2{
+    char *agency; //nombre de la agencia emisora
+    char *mostPopularInf; // infraccion con mas multas de cada agencia
+    size_t fineCount; // cantidad de multas de la infraccion 
+}vecQuery2;
+
 typedef struct query2{
-    char *agency;
-    char *mostPopularInf;
-    size_t fineCount;
-    struct query2*tail;
-}TNodeQ2;
-
-typedef TNodeQ2 * TListQ2;
-
-typedef struct TQuery2{
-    TListQ2 first;
-    TListQ2 iter;
+    vecQuery2 * dataVec; // vector de tipo quer2, cada posicion tiene los datos que piden del query
+    size_t dim; // dimension del vector
 }TQuery2;
 
 typedef struct listQuery3{

@@ -59,7 +59,7 @@ typedef struct infractionSystemCDT{
     size_t minYear; //años para la query 4
     size_t maxYear;
     TId *arrId; // vector con los id ordenados
-    size_t dim; //dimension total
+    size_t dim; //dimension total del arrId
 }infractionSystemCDT;
 
 
@@ -463,44 +463,24 @@ TQuery1 * query1(infractionSystemADT infractionSystem){
 }
 
 //QUERY 2 Infraccion mas popular por agencia emisora.
-//funciones iteracion y free Query2 (las vamos a necesitar para el main)
 
-void toBeginQ2(TQuery2* query2){    //no se si no tendria que usar TListQ2
-    query2->iter=query2->first;
-}
-
-int hasNextQ2(TQuery2* query2){
-    return query2->iter!=NULL;
-}
-
-void *nextQ2(TQuery2* query2){
-    if(!hasNextQ2(query2))
-        return NULL;
-    TListQ2 ans=query2->iter;   //no se si esto esta bien asi
-    query2->iter=query2->iter->tail;
-    return ans;
-}
-
-static void freeQ2Rec(TListQ2 listQ2){
-    if(listQ2==NULL)
-        return ;
-    freeQ2Rec(listQ2->tail);
-    free(listQ2);
-}
-
-void freeQ2(TQuery2* query2){
-    freeRec(query2->first);
+void freeQ2(TQuery2 *query2){
+    for(size_t i = 0; i < query2->dim; i++){
+        free(query2->dataVec[i].agency);
+        free(query2->dataVec[i].mostPopularInf);
+    }
+    free(query2->dataVec);
     free(query2);
 }
 
-static TQuery2 *searchMostPopular(TAgencyInfraction *infractions,size_t dim,TId *arr){
-    int i=0;
-    int maxId=0;
-    int maxCount=0;
-    TListInfractions maxIdNode = NULL;
-    TQuery2 *ans = malloc(sizeof(*ans));
+static vecQuery2 searchMostPopular(TAgencyInfraction *infractions, size_t dim, TId *arr){
+    int i = 0;
+    int maxId = 0; //el id de la infraccion con mas multas
+    int maxCount = 0; // cant mayor de multas
+    TListInfractions maxIdNode = NULL; //puntero al nodo de la infraccion con mas multas
+    TQuery2 *ans = malloc(sizeof(TQuery2));
 
-    while(i < dim){
+    while(i < dim){ // recorro el vector de ids (infracciones)
         if(maxCount < infractions[i].fineCount){
             maxCount = infractions[i].fineCount;
             maxId = infractions[i].id;
@@ -516,14 +496,27 @@ static TQuery2 *searchMostPopular(TAgencyInfraction *infractions,size_t dim,TId 
         }
         i++;
     }
-
-    ans->fineCount = maxCount;
-    ans->mostPopularInf = malloc(strlen(maxIdNode->description) + 1);
-    strcpy(ans->mostPopularInf, maxIdNode->description);
-    return ans;
+    ans->dim++; // incremento la dimension, ya que voy a agregar una nueva agencia con su max inf
+    ans->dataVec[dim - 1].fineCount = maxCount;
+    ans->dataVec[dim - 1].mostPopularInf = malloc(strlen(maxIdNode->description) + 1);
+    strcpy(ans->dataVec[dim - 1].mostPopularInf, maxIdNode->description);
+    return ans->dataVec[dim - 1];
 }
 
 //QUERY 2
+
+/*
+typedef struct vecQuery2{
+    char *agency; //nombre de la agencia emisora
+    char *searchMostPopularInf; // infraccion con mas multas de cada agencia
+    size_t fineCount; // cantidad de multas de la infraccion 
+}vecQuery2;
+
+typedef struct query2{
+    vecQuery2 * dataVec; // vector de tipo quer2, cada posicion tiene los datos que piden del query
+    size_t dim; // dimension del vector
+}TQuery2;
+*/
 
 TQuery2 *query2(infractionSystemADT system){ 
     TQuery2 *newQ2 = calloc(system->dimAgency, sizeof(TQuery2));
@@ -531,9 +524,9 @@ TQuery2 *query2(infractionSystemADT system){
 
     toBeginByAgency(system);
     while (hasNextByAgency(system)) {
-        if (system->iterAgency->infractions != NULL) {
-            newQ2[i] = *searchMostPopular(system->iterAgency->infractions, system->dim, system->arrId);
-            newQ2[i].agency = system->iterAgency->agencyName;
+        if (system->iterAgency->infractions != NULL) { // si tiene al menos una infraccion, entra
+            newQ2->dataVec[i] = searchMostPopular(system->iterAgency->infractions, system->dim, system->arrId);
+            newQ2->dataVec[i].agency = system->iterAgency->agencyName;
         }
         nextByAgency(system);
         i++;
