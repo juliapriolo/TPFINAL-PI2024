@@ -31,10 +31,12 @@ enum arguments{PROGRAM = 0, INFRACTIONS, TICKETS, MIN_YEAR, MAX_YEAR};
 #ifdef NY
 #define MAX_LEN_AGENCY 35 //largo maximo para una agencia en Nueva York
 #define MAX_LEN_DESCR 30 //largo maximo para el nombre de una infracción en Nueva York
+#define LEN_PLATE 7
 enum arguments{PLATE=0, DATE, ID, FINE_AMOUNT, AGENCY}; //NY
 #else
 #define MAX_LEN_AGENCY 13 //largo maximo para una agencia en Chicago
 #define MAX_LEN_DESCR 50 //largo maximo para el nombre de una infraccion en Chicago
+#define LEN_PLATE 10
 enum arguments{DATE=0, PLATE, AGENCY, ID, FINE_AMOUNT}; //CHI
 #endif
 
