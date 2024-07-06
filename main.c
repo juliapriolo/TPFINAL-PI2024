@@ -13,12 +13,6 @@
 #define FILES 2
 #define MAX_LINE 100
 
-//si esto confunde saquemoslo
-#define HTMLH1 "infraction"
-#define HTMLH2  "tickets"
-#define HTMLH3  "issuing agency"
-#define HTMLH4  "plate"
-
 #define INVALID_YEAR -1
 #define ERROR_PAR 1
 #define ERROR_FILE 2
@@ -71,7 +65,7 @@ int main(int argc, char *argv[]){
             }
         minYear = atoi(argv[MIN_YEAR]);
     }
-    if ( argc == 5 ){    //Vemos si maxYear es un tipo de dato valido
+    if ( argc == MAX_ARG ){    //Vemos si maxYear es un tipo de dato valido
         if(!valid( argv[MAX_YEAR]) ){
             fprintf( stderr, "Incorrect type for the maximum year\n");
             exit( ERROR_PAR);
@@ -83,7 +77,6 @@ int main(int argc, char *argv[]){
             exit(ERROR_PAR);
         }
     }
-    return 0;
 
     //Inicializacion de archivos de lectura
     FILE * infractions = fopen(argv[INFRACTIONS], "r");              // archivo de infractions. Definir INFRACTIONS y TICKETS
@@ -97,11 +90,11 @@ int main(int argc, char *argv[]){
         exit(ERROR_FILE);                                            //No se bien si hay que poner ese error
     }
 
-    errno =0;
+    errno = 0;
     infractionSystemADT infractionSystem = newInfractionSystem(minYear, maxYear);
 
     //Chequeo inicializacion del TAD exitosa
-    if(infractionSystem==NULL || errno==ENOMEM){
+    if(infractionSystem == NULL || errno == ENOMEM){
         fprintf(stderr, "Error creating infractionSystem\n");
         closeCSV(data_files, FILES);
         freeInfractionSystem(infractionSystem);
@@ -123,21 +116,25 @@ int main(int argc, char *argv[]){
     closeCSV(data_files, FILES);
 
     //Inicializacion de archivos de escritura
-    FILE * q1CSV= newCSV( "query1.csv", HEADER1);
-    FILE * q2CSV= newCSV( "query2.csv",HEADER2);
-    FILE * q3CSV= newCSV( "query3.csv",HEADER3);
-    FILE * q4CSV= newCSV( "query4.csv",HEADER4);
-    FILE * filesCSV[]={q1CSV, q2CSV, q3CSV, q4CSV};
+    FILE * q1CSV = newCSV( "query1.csv", HEADER1);
+    FILE * q2CSV = newCSV( "query2.csv",HEADER2);
+    FILE * q3CSV = newCSV( "query3.csv",HEADER3);
+    FILE * q4CSV = newCSV( "query4.csv",HEADER4);
+    FILE * filesCSV[] = {q1CSV, q2CSV, q3CSV, q4CSV};
 
-    htmlTable q1HTML= newTable( "query1.html", 2, HTMLH1, HTMLH2);
-    htmlTable q2HTML= newTable( "query2.html", 3, HTMLH3 , HTMLH1, HTMLH2);
-    htmlTable q3HTML= newTable( "query3.html", 3, HTMLH1, HTMLH4, HTMLH2);
-    htmlTable q4HTML= newTable( "query4.html", 4, "year", "ticketsTop1Month", "ticketsTop2Month", "ticketsTop3Month");
-    //Decidir si dejamos los strings constantes o los define (si hacemos define faltan los de q4HTML)
-    htmlTable filesHTML[]={q1HTML, q2HTML, q3HTML, q4HTML};
+    htmlTable q1HTML = newTable( "query1.html", 2, "infraction", "tickets");
+    htmlTable q2HTML = newTable( "query2.html", 3, "issuing agency" , "infraction", "tickets");
+    htmlTable q3HTML = newTable( "query3.html", 3, "infraction", "plate", "tickets");
+    htmlTable q4HTML = newTable( "query4.html", 4, "year", "ticketsTop1Month", "ticketsTop2Month", "ticketsTop3Month");
+    htmlTable filesHTML[] = {q1HTML, q2HTML, q3HTML, q4HTML};
 
-    //Falta chequeo de memoria en ambos archivos!!
-
+    //Chequeo de error en la creacion de archivos CSV y HTML
+    for(size_t i = 0; i < CANT_QUERY; i++){
+        if((filesCSV[i] == NULL) || (filesHTML[i] == NULL)){
+            fprintf(stderr, "Could not open file\n");
+            closeWFile(infractionSystem, filesCSV, filesHTML, ERROR_FILE, CANT_QUERY);
+        }
+    }
 
     // Carga de Query 1 
     char infraction[MAX_LINE];
@@ -207,7 +204,6 @@ int main(int argc, char *argv[]){
     
     freeQ3(q3);
 
-
     //Carga el Query 4
     TQuery4 * q4 = query4(infractionSystem);
 
@@ -230,6 +226,9 @@ int main(int argc, char *argv[]){
     }
     freeQ4(q4);
 
+    closeWFile(infractionSystem, filesCSV, filesHTML, OK, CANT_QUERY);
+
+    return OK;
 
 }
 
@@ -356,6 +355,22 @@ void closeHTML(htmlTable files[], int fileQuantity){
         if(files[i] != NULL)
             closeHTMLTable(files[i]);
     }
+}
+
+// Cierra los archivos de lectura y libera el sistema, en caso de que halla un error, aborta
+void closeRFile(infractionSystemADT infractionSystem, FILE *data_files[], int error, int fileQuantity){
+    freeInfractionSystem(infractionSystem);
+    closeCSV(data_files, fileQuantity);
+}
+
+// Cierra los archivos de escritura y libera el sistema, en caso de que halla un error, aborta
+void closeWFile(infractionSystemADT infractionSystem, FILE *csvFile[], FILE *htmlFile, int error, int queryQuantity){
+    freeInfractionSystem(infractionSystem);
+    closeCSV(csvFile, queryQuantity);
+    closeHTML(htmlFile, queryQuantity);
+    if(error){
+        exit(error);
+    }    
 }
 
 int valid( const char* s){
