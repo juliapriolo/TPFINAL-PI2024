@@ -518,10 +518,15 @@ static vecQuery2 searchMostPopular(TAgencyInfraction *infractions, size_t dim, T
 //QUERY 2
 
 TQuery2 *query2(infractionSystemADT system){ 
+    errno = 0;
     TQuery2 *newQ2 = calloc(system->dimAgency, sizeof(TQuery2));
-    int i = 0;
+    if(errno == ENOMEM || newQ2 == NULL){
+        return NULL;
+    }
 
     toBeginByAgency(system);
+    size_t i = 0;
+
     while (hasNextByAgency(system)) {
         if (system->iterAgency->infractions != NULL) { // si tiene al menos una infraccion, entra
             newQ2->dataVec[i] = searchMostPopular(system->iterAgency->infractions, system->dim, system->arrId);
