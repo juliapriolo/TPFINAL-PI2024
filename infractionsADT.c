@@ -358,6 +358,23 @@ static void freeArrYears(size_t **arrYears, size_t minYear, size_t maxYear) {
     free(arrYears);
 }
 
+static void freeAgencyVec(TAgencyInfraction * vec, size_t dim){
+    for(size_t i = 0; i < dim; i++){
+        free(vec[i]);
+    }
+    return;
+}
+
+static void freeLAgencyRec(TListAgency list){
+    if(list == NULL){
+        return;
+    }
+    freeLAgencyRec(list->tail);
+    freeAgencyVec(list->infractions, list->dim);
+    free(list->agencyName);
+    free(list);
+}
+
 void freeInfractionSystem(infractionSystemADT infractionSystem){
     freeLInfractionsRec(infractionSystem->firstInfraction);
     freeLAgencyRec(infractionSystem->firstAgency);
