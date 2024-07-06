@@ -22,6 +22,9 @@
 #define ERROR 1
 #define OK 0
 
+#define PROGRAM 0
+#define NY 1
+#define CHI 2
 #define MIN_YEAR 3
 #define MAX_YEAR 4
 #define MAX_ARG 5
