@@ -233,8 +233,6 @@ int main(int argc, char *argv[]){
 
 }
 
-
-
 int readInfraction(FILE *file, int idColumn, int infractionColumn, infractionSystemADT infractionSystem){
     char currentLine[MAX_LINE];
     int succed = 0;
@@ -329,13 +327,13 @@ int readTickets(FILE *file, int plateColumn, int dateColumn, int idColumn, int a
         
 //el header se pasa por parametro y dependiendo del query uso el respectivo header del define
 FILE *newCSV(const char *fileName, char *header){
-    FILE *file=fopen(fileName, "w");
-    errno=0;
-    if(file==NULL){
+    FILE *file = fopen(fileName, "w");
+    errno = 0;
+    if(file == NULL){
         perror("Error al abrir el archivo\n");
         return NULL;
     }
-    if(errno==ENOMEM){
+    if(errno == ENOMEM){
         perror("Error al abrir el archivo\n");
         fclose(file);
         return NULL;
@@ -345,8 +343,8 @@ FILE *newCSV(const char *fileName, char *header){
 }
 
 void closeCSV(FILE *files[], int fileQuantity){
-    for(int i=0;i<fileQuantity;i++){
-        if(files[i]!=NULL){
+    for(int i = 0; i < fileQuantity; i++){
+        if(files[i] != NULL){
             fclose(files[i]);
         }
     }
@@ -354,14 +352,14 @@ void closeCSV(FILE *files[], int fileQuantity){
 
 //funcion que cierra los archivos html que estan en el arreglo files
 void closeHTML(htmlTable files[], int fileQuantity){
-    for(int i=0;i<fileQuantity;i++){
-        if(files[i]!=NULL)
+    for(int i = 0; i < fileQuantity; i++){
+        if(files[i] != NULL)
             closeHTMLTable(files[i]);
     }
 }
 
 int valid( const char* s){
-    for ( int i =0; s[i]; i++){
+    for ( int i = 0; s[i]; i++){
         if ( !isdigit(s[i]))
             return 0;
     }
