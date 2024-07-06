@@ -211,6 +211,30 @@ int main(int argc, char *argv[]){
     
     freeQ3(q3);
 
+
+    //Carga el Query 4
+    TQuery4 * q4 = query4(infractionSystem);
+
+    //encabezdo
+    fprintf(filesCSV[FOURTH], "year;ticketsTop1Month;ticketsTop2Month;ticketsTop3Month\n");
+    char year[MAX_LINE];
+    char topMonth1[MAX_LINE];
+    char topMonth2[MAX_LINE];
+    char topMonth3[MAX_LINE];
+
+    for(size_t i = 0; i < q4->dim; i++){
+        fprintf(filesCSV[FOURTH], "%ld;%s;%s;%s\n", q4->vec[i].year, q4->vec[i].monthTop1, q4->vec[i].monthTop2, q4->vec[i].monthTop3);
+
+        sprintf(year, "%ld", q4->vec[i].year);
+        sprintf(topMonth1, "%ld", q4->vec[i].monthTop1);
+        sprintf(topMonth2, "%ld", q4->vec[i].monthTop2);
+        sprintf(topMonth3, "%ld", q4->vec[i].monthTop3);
+
+        addHTMLRow(filesHTML[FOURTH], year, topMonth1, topMonth2, topMonth3);
+    }
+    freeQ4(q4);
+
+
 }
 
 
