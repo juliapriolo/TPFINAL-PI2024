@@ -166,26 +166,22 @@ int main(int argc, char *argv[]){
     //Carga de Query 2
     TQuery2 * q2 = query2(infractionSystem);
 
-    toBeginQ2(q2);
-
     // Encabezados CSV
     fprintf(filesCSV[SECOND], "issuingAgency;infraction;tickets\n");
     char agency[MAX_LINE];
     char infraction[MAX_LINE];
     char tickets[MAX_LINE];
 
-    while (hasNextQ2(q2)) {
-        fprintf(filesCSV[SECOND], "%s;%s;%ld\n", q2->iter->agency, q2->iter->mostPopularInf, q2->iter->fineCount);
+    for(size_t i = 0; i < q2->dim; i++) {
+        fprintf(filesCSV[SECOND], "%s;%s;%ld \n", q2->dataVec[i].agency, q2->dataVec[i].mostPopularInf, q2->dataVec[i].fineCount);
 
         // Preparar para HTML
-        sprintf(agency, "%s", q2->iter->agency);
-        sprintf(infraction, "%s", q2->iter->mostPopularInf);
-        sprintf(tickets, "%ld", q2->iter->fineCount);
+        sprintf(agency, "%s", q2->dataVec[i].agency);
+        sprintf(infraction, "%s", q2->dataVec[i].mostPopularInf);
+        sprintf(tickets, "%ld", q2->dataVec[i].fineCount);
 
         // Agregar fila HTML
         addHTMLRowQuery2(filesHTML[FIRST], agency, infraction, tickets);
-
-        q2->iter = nextQ2(q2);
     }
     freeQ2(q2);
 
