@@ -8,6 +8,7 @@
 #define MAX_AG 30 //Despues cambiar el valor al que deberia ser
 #define EMPTY "EMPTY"
 #define START 0
+#define CURRENT_YEAR 2024
 
 enum Meses {Enero = 0,Febrero,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre};
 static char *monthNames[] = {"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
@@ -663,11 +664,18 @@ TQuery4 *query4(infractionSystemCDT *infractionSystem) {
     if (infractionSystem == NULL || infractionSystem->arrYears == NULL) {
         return NULL;
     }
-
-    size_t dim = infractionSystem->maxYear - infractionSystem->minYear + 1;
+    size_t dim;
+    if(infractionSystem->maxYear == INVALID_YEAR){  //depende de si se recibio un maxYear o no
+        dim = CURRENT_YEAR - infractionSystem->minYear + 1;
+    }else{
+        dim = infractionSystem->maxYear - infractionSystem->minYear + 1;
+    }
     TQuery4 *ans = calloc(1, sizeof(TQuery4));
+    if(ans==NULL || errno == ENOMEM){
+        return NULL;
+    }
     ans->vec = calloc(dim,sizeof(*(ans->vec)));
-    if (ans == NULL) {
+    if (ans->vec == NULL) {
         return NULL;
     }
     for (size_t i = 0; i < dim; i++) {
@@ -695,6 +703,18 @@ TQuery4 *query4(infractionSystemCDT *infractionSystem) {
         ans->vec[i].monthTop1 = (m1 != NULL) ? copyStr(m1) : copyStr(EMPTY);
         ans->vec[i].monthTop2 = (m2 != NULL) ? copyStr(m2) : copyStr(EMPTY);
         ans->vec[i].monthTop3 = (m3 != NULL) ? copyStr(m3) : copyStr(EMPTY);
+
+        //verifico que no haya errores
+        if (ans->vec[i].monthTop1 == NULL || ans->vec[i].monthTop2 == NULL || ans->vec[i].monthTop3 == NULL) {
+            for (size_t j = 0; j <= i; j++) {
+                free(ans->vec[j].monthTop1);
+                free(ans->vec[j].monthTop2);
+                free(ans->vec[j].monthTop3);
+            }
+            free(ans->vec);
+            free(ans);
+            return NULL;
+        }
     }
 
     return ans;
