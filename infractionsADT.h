@@ -67,6 +67,13 @@ typedef struct query2{
     char *agency;
     char *mostPopularInf;
     size_t fineCount;
+}TNodeQ2;
+
+typedef TNodeQ2 * TListQ2;
+
+typedef struct TQuery2{
+    TListQ2 first;
+    TListQ2 iter;
 }TQuery2;
 
 typedef struct listQuery3{
@@ -112,3 +119,4 @@ void toBeginQ1(TQuery1 * query1);
 int hasNextQ1(TQuery1 * query1);
 void * nextQ1(TQuery1 * query1);
 void freeQ1(TQuery1 * query1);
+

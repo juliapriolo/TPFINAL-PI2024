@@ -11,6 +11,7 @@
 #define DELIMITER ";"
 #define CANT_QUERY 4
 #define MAX_LINE 100
+#define FIRST 0
 
 //si esto confunde saquemoslo
 #define HTMLH1 "infraction"
@@ -104,7 +105,60 @@ int main(int argc, char *argv[]){
     htmlTable filesHTML[]={q1HTML, q2HTML, q3HTML, q4HTML};
 
     //Falta chequeo de memoria en ambos archivos!!
+
+
+    // Carga de Query 1 
+    char infraction[MAX_LINE];
+    char total[MAX_LINE];
+
+    TQuery1 * q1 = query1(infractionSystem);
+
+    toBeginQ1(q1);
+
+    //Encabezado archivo csv:
+    fprintf(filesCSV[FIRST], "infraction;totaltickets\n");    
+
+    while ( hasNextQ1(q1)){
+        fprintf(filesCSV[FIRST], "%s;%ld\n" , q1->iter->infraction, q1->iter->totalInfracctions);     
+        //No se bien que argumento iria en filesCSV
+        sprintf (infraction, "%s", q1->iter->infraction);
+        sprintf (total, "%ld", q1->iter->totalInfracctions);
+    
+        addHTMLRow(filesHTML[FIRSTQ], infraction, total);     //no se si faltaria algun parametro mas, FIRSTQ especifica 
+
+        nextQ1(q1);
+    }
+    freeQ1(q1);
+    
+    
+    //Carga de Query 2
+    TQuery2 * q2 = query2(infractionSystem);
+
+    toBeginQ2(q2);
+
+    // Encabezados CSV
+    fprintf(filesCSV[FIRST], "issuingAgency;infraction;tickets\n");
+    char agency[MAX_LINE];
+    char infraction[MAX_LINE];
+    char tickets[MAX_LINE];
+
+    while (hasNextQ2(q2)) {
+        fprintf(filesCSV[FIRST], "%s;%s;%ld\n", q2->iter->agency, q2->iter->mostPopularInf, q2->iter->fineCount);
+
+        // Preparar para HTML
+        sprintf(agency, "%s", q2->iter->agency);
+        sprintf(infraction, "%s", q2->iter->mostPopularInf);
+        sprintf(tickets, "%ld", q2->iter->fineCount);
+
+        // Agregar fila HTML
+        addHTMLRowQuery2(filesHTML[FIRST], agency, infraction, tickets);
+
+        q2->iter = nextQ2(q2);
+    }
+    freeQ2(q2);
+
 }
+
 
 
 int readInfraction(FILE *file, int idColumn, int infractionColumn, infractionSystemADT infractionSystem){
