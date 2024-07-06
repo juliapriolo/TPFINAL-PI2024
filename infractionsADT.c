@@ -508,11 +508,10 @@ static vecQuery2 searchMostPopular(TAgencyInfraction *infractions, size_t dim, T
         }
         i++;
     }
-    ans->dim++; // incremento la dimension, ya que voy a agregar una nueva agencia con su max inf
-    ans->dataVec[dim - 1].fineCount = maxCount;
-    ans->dataVec[dim - 1].mostPopularInf = malloc(strlen(maxIdNode->description) + 1);
-    strcpy(ans->dataVec[dim - 1].mostPopularInf, maxIdNode->description);
-    return ans->dataVec[dim - 1];
+    ans->dataVec[0].fineCount = maxCount;
+    ans->dataVec[0].mostPopularInf = malloc(strlen(maxIdNode->description) + 1);
+    strcpy(ans->dataVec[0].mostPopularInf, maxIdNode->description);
+    return ans->dataVec[0];
 }
 
 //QUERY 2
