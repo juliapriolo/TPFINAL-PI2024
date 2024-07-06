@@ -18,11 +18,7 @@
 #define ERROR_FILE 2
 #define OK 0
 
-#define PROGRAM 0
-#define INFRACTIONS 1
-#define TICKETS 2
-#define MIN_YEAR 3
-#define MAX_YEAR 4
+
 #define MAX_ARG 5
 #define MIN_ARG 4
 #define DESCR 1
@@ -30,7 +26,7 @@
 
 enum files{FIRST = 0, SECOND, THIRD, FOURTH};    //Enum para buscar los archivos filescsv y fileshtml
 
-//enum arguments{PROGRAM=0, NY, CHI, MIN_YEAR, MAX_YEAR};   preguntarle al resto del grupo que les parece mejor
+enum arguments{PROGRAM = 0, INFRACTIONS, TICKETS, MIN_YEAR, MAX_YEAR};  
 
 #ifdef NY
 #define MAX_LEN_AGENCY 35 //largo maximo para una agencia en Nueva York
