@@ -517,19 +517,6 @@ static vecQuery2 searchMostPopular(TAgencyInfraction *infractions, size_t dim, T
 
 //QUERY 2
 
-/*
-typedef struct vecQuery2{
-    char *agency; //nombre de la agencia emisora
-    char *searchMostPopularInf; // infraccion con mas multas de cada agencia
-    size_t fineCount; // cantidad de multas de la infraccion 
-}vecQuery2;
-
-typedef struct query2{
-    vecQuery2 * dataVec; // vector de tipo quer2, cada posicion tiene los datos que piden del query
-    size_t dim; // dimension del vector
-}TQuery2;
-*/
-
 TQuery2 *query2(infractionSystemADT system){ 
     TQuery2 *newQ2 = calloc(system->dimAgency, sizeof(TQuery2));
     int i = 0;
