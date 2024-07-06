@@ -67,6 +67,7 @@ typedef struct query2{
     char *agency;
     char *mostPopularInf;
     size_t fineCount;
+    struct query2*tail;
 }TNodeQ2;
 
 typedef TNodeQ2 * TListQ2;
