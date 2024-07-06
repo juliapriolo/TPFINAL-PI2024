@@ -189,6 +189,28 @@ int main(int argc, char *argv[]){
     }
     freeQ2(q2);
 
+    // Carga de Query 3 
+    char infraction[MAX_LINE];
+    char plate[MAX_LINE];
+    char total[MAX_LINE];
+
+    TQuery3 * q3 = query3(infractionSystem);
+
+    toBeginQ3(q3);
+
+    //Encabezado archivo csv:
+    fprintf(filesCSV[THIRD], "infraction;plate;tickets\n");    
+
+    while ( hasNextQ3(q3)){
+        fprintf(filesCSV[THIRD], "%s;%s;%ld\n", q3->iter->infraction, q3->iter->plate, q3->iter->totalInfractions);
+        // Agregar fila HTML
+        addHTMLRow(filesHTML[THIRD], q3->iter->infraction, q3->iter->plate, q3->iter->totalInfractions);
+
+        nextQ3(q3);
+    }
+    
+    freeQ3(q3);
+
 }
 
 
