@@ -10,6 +10,7 @@
 #define HEADER4 "year;ticketsTop1Month;ticketsTop2Month;ticketsTop3Month\n"
 #define DELIMITER ";"
 #define CANT_QUERY 4
+#define FILES 2
 #define MAX_LINE 100
 #define FIRST 0
 
@@ -20,7 +21,8 @@
 #define HTMLH4  "plate"
 
 #define INVALID_YEAR -1
-#define ERROR 1
+#define ERROR_PAR 1
+#define ERROR_FILE 2
 #define OK 0
 
 #define PROGRAM 0
@@ -53,27 +55,27 @@ int main(int argc, char *argv[]){
 
     if(argc > MAX_ARG || argc<MIN_ARG){
         fprintf(stderr, "Incorrect amount of arguments supplied\n");
-        exit(ERROR);
+        exit(ERROR_PAR);
     }
     int minYear, maxYear = INVALID_YEAR; //no estamos seguras si hay que inicializar el minYear o no
 
     if ( argc >= MIN_ARG ){ //Vemos si minYear es un tipo de dato valido
         if( !valid( argv[MIN_YEAR])){
             fprintf( stderr, "Incorrect type for the minimum year\n");
-            exit(ERROR); //vamos a hacer los enums para los distintos tipos de errores??
+            exit(ERROR_PAR); //vamos a hacer los enums para los distintos tipos de errores??
             }
         minYear = atoi(argv[MIN_YEAR]);
     }
     if ( argc == 5 ){    //Vemos si maxYear es un tipo de dato valido
         if(!valid( argv[MAX_YEAR]) ){
             fprintf( stderr, "Incorrect type for the maximum year\n");
-            exit( ERROR);
+            exit( ERROR_PAR);
             }
         maxYear = atoi(argv[MAX_YEAR]);
 
         if ( minYear > maxYear ){   //Vemos que el año minimo no sea mayor que el año maximo
             fprintf(stderr, "Invalid: minYear can not be greater than maxYear\n");
-            exit(ERROR);
+            exit(ERROR_PAR);
         }
     }
     return 0;
@@ -86,8 +88,8 @@ int main(int argc, char *argv[]){
     //Chequeo de open files exitoso
     if (data_files[INFRACTIONS - 1] == NULL || data_files[TICKETS - 1]) {
         fprintf(stderr, "Error opening files\n");           
-        closeCSV(data_files, 2);                                //magic number CAMBIAR
-        exit(ERROR);                                            //No se bien si hay que poner ese error
+        closeCSV(data_files, FILES);                                
+        exit(ERROR_FILE);                                            //No se bien si hay que poner ese error
     }
 
     //Inicializacion de archivos de escritura
