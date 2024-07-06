@@ -32,7 +32,7 @@
 #define MAX_ARG 5
 #define MIN_ARG 4
 
-enum files{FIRST, SECOND, THIRD, FORTH};    //Enum para buscar los archivos filescsv y fileshtml
+enum files{FIRST = 0, SECOND, THIRD, FOURTH};    //Enum para buscar los archivos filescsv y fileshtml
 
 //enum arguments{PROGRAM=0, NY, CHI, MIN_YEAR, MAX_YEAR};   preguntarle al resto del grupo que les parece mejor
 
