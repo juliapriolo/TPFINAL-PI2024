@@ -12,7 +12,6 @@
 #define CANT_QUERY 4
 #define FILES 2
 #define MAX_LINE 100
-#define FIRST 0
 
 //si esto confunde saquemoslo
 #define HTMLH1 "infraction"
@@ -32,6 +31,8 @@
 #define MAX_YEAR 4
 #define MAX_ARG 5
 #define MIN_ARG 4
+
+enum files{FIRST, SECOND, THIRD, FORTH};    //Enum para buscar los archivos filescsv y fileshtml
 
 //enum arguments{PROGRAM=0, NY, CHI, MIN_YEAR, MAX_YEAR};   preguntarle al resto del grupo que les parece mejor
 
@@ -125,8 +126,8 @@ int main(int argc, char *argv[]){
         //No se bien que argumento iria en filesCSV
         sprintf (infraction, "%s", q1->iter->infraction);
         sprintf (total, "%ld", q1->iter->totalInfracctions);
-    
-        addHTMLRow(filesHTML[FIRSTQ], infraction, total);     //no se si faltaria algun parametro mas, FIRSTQ especifica 
+        //Agrego una nueva fila al archivo
+        addHTMLRow(filesHTML[FIRST], infraction, total);     
 
         nextQ1(q1);
     }
@@ -139,13 +140,13 @@ int main(int argc, char *argv[]){
     toBeginQ2(q2);
 
     // Encabezados CSV
-    fprintf(filesCSV[FIRST], "issuingAgency;infraction;tickets\n");
+    fprintf(filesCSV[SECOND], "issuingAgency;infraction;tickets\n");
     char agency[MAX_LINE];
     char infraction[MAX_LINE];
     char tickets[MAX_LINE];
 
     while (hasNextQ2(q2)) {
-        fprintf(filesCSV[FIRST], "%s;%s;%ld\n", q2->iter->agency, q2->iter->mostPopularInf, q2->iter->fineCount);
+        fprintf(filesCSV[SECOND], "%s;%s;%ld\n", q2->iter->agency, q2->iter->mostPopularInf, q2->iter->fineCount);
 
         // Preparar para HTML
         sprintf(agency, "%s", q2->iter->agency);
