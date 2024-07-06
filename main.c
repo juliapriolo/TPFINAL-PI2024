@@ -12,6 +12,12 @@
 #define CANT_QUERY 4
 #define MAX_LINE 100
 
+//si esto confunde saquemoslo
+#define HTMLH1 "infraction"
+#define HTMLH2  "tickets"
+#define HTMLH3  "issuing agency"
+#define HTMLH4  "plate"
+
 #define INVALID_YEAR -1
 #define ERROR 1
 #define OK 0
@@ -52,14 +58,14 @@ int main(int argc, char *argv[]){
             fprintf( stderr, "Incorrect type for the minimum year\n");
             exit(ERROR); //vamos a hacer los enums para los distintos tipos de errores??
             }
-        minYear = atoi(args[MIN_YEAR]);
+        minYear = atoi(argv[MIN_YEAR]);
     }
-    if ( cantArg == 5 ){    //Vemos si maxYear es un tipo de dato valido
-        if(!valid( args[MAX_YEAR]) ){
+    if ( argc == 5 ){    //Vemos si maxYear es un tipo de dato valido
+        if(!valid( argv[MAX_YEAR]) ){
             fprintf( stderr, "Incorrect type for the maximum year\n");
             exit( ERROR);
             }
-        maxYear = atoi(args[MAX_YEAR]);
+        maxYear = atoi(argv[MAX_YEAR]);
 
         if ( minYear > maxYear ){   //Vemos que el año minimo no sea mayor que el año maximo
             fprintf(stderr, "Invalid: minYear can not be greater than maxYear\n");
@@ -67,6 +73,34 @@ int main(int argc, char *argv[]){
         }
     }
     return 0;
+
+    //Inicializacion de archivos de lectura
+    FILE * infractions = fopen( args[INFRACTIONS], "r");              // archivo de infractions. Definir INFRACTIONS y TICKETS
+    FILE * tickets = fopen( args[TICKETS], "r");                      // archivo de estaciones 
+    FILE * data_files[] = {infractions, tickets};
+
+    //Chequeo de open files exitoso
+    if (data_files[INFRACTIONS - 1] == NULL || data_files[TICKETS - 1]) {
+        fprintf(stderr, "Error opening files\n");           
+        closeCSV(data_files, 2);                                //magic number CAMBIAR
+        exit(ERROR);                                            //No se bien si hay que poner ese error
+    }
+
+    //Inicializacion de archivos de escritura
+    FILE * q1CSV= newCSV( "query1.csv", HEADER1);
+    FILE * q2CSV= newCSV( "query2.csv",HEADER2);
+    FILE * q3CSV= newCSV( "query3.csv",HEADER3);
+    FILE * q4CSV= newCSV( "query4.csv",HEADER4);
+    FILE * filesCSV[]={q1CSV, q2CSV, q3CSV, q4CSV};
+
+    htmlTable q1HTML= newTable( "query1.html", 2, HTMLH1, HTMLH2);
+    htmlTable q2HTML= newTable( "query2.html", 3, HTMLH3 , HTMLH1, HTMLH2);
+    htmlTable q3HTML= newTable( "query3.html", 3, HTMLH1, HTMLH4, HTMLH2);
+    htmlTable q4HTML= newTable( "query4.html", 4, "year", "ticketsTop1Month", "ticketsTop2Month", "ticketsTop3Month");
+    //Decidir si dejamos los strings constantes o los define (si hacemos define faltan los de q4HTML)
+    htmlTable filesHTML[]={q1HTML, q2HTML, q3HTML, q4HTML};
+
+    //Falta chequeo de memoria en ambos archivos!!
 }
 
 
