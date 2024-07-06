@@ -18,6 +18,8 @@
 
 #define MIN_YEAR 3
 #define MAX_YEAR 4
+#define MAX_ARG 5
+#define MIN_ARG 4
 
 //enum arguments{PROGRAM=0, NY, CHI, MIN_YEAR, MAX_YEAR};   preguntarle al resto del grupo que les parece mejor
 
@@ -39,13 +41,13 @@ int valid( const char* s);  //se asegura que el string sea todo de numeros
 
 int main(int argc, char *argv[]){
 
-    if(argc > 5 || argc<4){
+    if(argc > MAX_ARG || argc<MIN_ARG){
         fprintf(stderr, "Incorrect amount of arguments supplied\n");
         exit(ERROR);
     }
     int minYear, maxYear = INVALID_YEAR; //no estamos seguras si hay que inicializar el minYear o no
 
-    if ( argc >= 4 ){ //Vemos si minYear es un tipo de dato valido
+    if ( argc >= MIN_ARG ){ //Vemos si minYear es un tipo de dato valido
         if( !valid( argv[MIN_YEAR])){
             fprintf( stderr, "Incorrect type for the minimum year\n");
             exit(ERROR); //vamos a hacer los enums para los distintos tipos de errores??
