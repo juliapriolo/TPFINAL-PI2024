@@ -7,6 +7,7 @@
 #define MONTHS 12
 #define MAX_AG 30 //Despues cambiar el valor al que deberia ser
 #define EMPTY "EMPTY"
+#define START 0
 
 enum Meses {Enero = 0,Febrero,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre};
 static char *monthNames[] = {"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
@@ -276,7 +277,7 @@ int addTicket(infractionSystemADT infractionSystem, size_t id,char *plate){
 }
 
 int addDate(infractionSystemADT system,int year,int month){
-    if(year < system->minYear || year > system->maxYear || month < 1 || month > 12){ //SACAR MAGIC NUMBERS
+    if(year < system->minYear || year > system->maxYear || month < Enero || month > Diciembre){ //no se si puedo hacer esto xq month no es tipo enum Meses
         return 0;
     }
     system->arrYears[year-system->minYear][month-1]++;
@@ -295,7 +296,7 @@ int hasNext(infractionSystemADT infractionSystem){
 
 void * next(infractionSystemADT infractionSystem){
     if(!hasNext(infractionSystem)){
-        exit(1);
+        return NULL;    //chequear
     }
     TListInfractions ans = infractionSystem->iterInfractions;
     infractionSystem->iterInfractions = ans->tail;
@@ -314,7 +315,7 @@ int hasNextByAgency(infractionSystemADT a){
 
 char *nextByAgency(infractionSystemADT a){
     if(!hasNextByAgency(a))
-        exit(1);
+        return NULL;
     char *ans=a->iterAgency->agencyName;
     a->iterAgency=a->iterAgency->tail;
     return ans;
@@ -435,7 +436,7 @@ static TListQ1 addRecQ1(TListQ1 list, char * infractionName, size_t total){
 
 static char * getInfName(infractionSystemADT infractionSystem){
     if(!hasNext(infractionSystem)){
-        return 0;
+        return NULL;
     }
     return infractionSystem->iterInfractions->description;
 }
@@ -473,10 +474,10 @@ static TQuery2 *searchMostPopular(TAgencyInfraction *infractions,size_t dim,TId 
         if(maxCount < infractions[i].fineCount){
             maxCount = infractions[i].fineCount;
             maxId = infractions[i].id;
-            maxIdNode = binarySearch(arr, infractions[i].id, 0, dim-1);
+            maxIdNode = binarySearch(arr, infractions[i].id, START, dim-1);
         } else if(maxCount == infractions[i].fineCount){
-            maxIdNode = binarySearch(arr, maxId, 0, dim-1);
-            TListInfractions currentIdNode = binarySearch(arr, infractions[i].id, 0, dim-1);
+            maxIdNode = binarySearch(arr, maxId, START, dim-1);
+            TListInfractions currentIdNode = binarySearch(arr, infractions[i].id, START, dim-1);
             if(strcasecmp(maxIdNode->description, currentIdNode->description) > 0){ // Me quedo con el orden alfabetico
                 maxId = infractions[i].id;
                 maxCount = infractions[i].fineCount;
