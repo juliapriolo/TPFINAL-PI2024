@@ -86,8 +86,8 @@ int main(int argc, char *argv[]){
     return 0;
 
     //Inicializacion de archivos de lectura
-    FILE * infractions = fopen( args[INFRACTIONS], "r");              // archivo de infractions. Definir INFRACTIONS y TICKETS
-    FILE * tickets = fopen( args[TICKETS], "r");                      // archivo de tickets
+    FILE * infractions = fopen(argv[INFRACTIONS], "r");              // archivo de infractions. Definir INFRACTIONS y TICKETS
+    FILE * tickets = fopen( argv[TICKETS], "r");                      // archivo de tickets
     FILE * data_files[] = {infractions, tickets};
 
     //Chequeo de open files exitoso
