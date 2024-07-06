@@ -48,7 +48,8 @@ FILE *newCSV(const char *fileName, char *header);   //funcion que crea un nuevo 
 void closeCSV(FILE *files[], int fileQuantity); //funcion que cierra los archivos csv
 void closeHTML(htmlTable files[], int fileQuantity);    //funcion que cierra los archivos html que estan en el arreglo files
 int valid( const char* s);  //se asegura que el string sea todo de numeros
-
+void closeRFile(infractionSystemADT infractionSystem, FILE *data_files[], int error, int fileQuantity);
+void closeWFile(infractionSystemADT infractionSystem, FILE *csvFile[], FILE *htmlFile, int error, int queryQuantity);
 
 int main(int argc, char *argv[]){
 
