@@ -25,12 +25,14 @@
 #define OK 0
 
 #define PROGRAM 0
-#define NY 1
-#define CHI 2
+#define INFRACTIONS 1
+#define TICKETS 2
 #define MIN_YEAR 3
 #define MAX_YEAR 4
 #define MAX_ARG 5
 #define MIN_ARG 4
+#define DESCR 1
+#define ID_INFR 0
 
 enum files{FIRST = 0, SECOND, THIRD, FOURTH};    //Enum para buscar los archivos filescsv y fileshtml
 
@@ -39,9 +41,11 @@ enum files{FIRST = 0, SECOND, THIRD, FOURTH};    //Enum para buscar los archivos
 #ifdef NY
 #define MAX_LEN_AGENCY 35 //largo maximo para una agencia en Nueva York
 #define MAX_LEN_DESCR 30 //largo maximo para el nombre de una infracción en Nueva York
+enum arguments{PLATE=0, DATE, ID, FINE_AMOUNT, AGENCY}; //NY
 #else
 #define MAX_LEN_AGENCY 13 //largo maximo para una agencia en Chicago
 #define MAX_LEN_DESCR 50 //largo maximo para el nombre de una infraccion en Chicago
+enum arguments{DATE=0, PLATE, AGENCY, ID, FINE_AMOUNT}; //CHI
 #endif
 
 int readInfraction(FILE *file, int idColumn, int infractionColumn, infractionSystemADT infractionSystem);
@@ -92,6 +96,31 @@ int main(int argc, char *argv[]){
         closeCSV(data_files, FILES);                                
         exit(ERROR_FILE);                                            //No se bien si hay que poner ese error
     }
+
+    errno =0;
+    infractionSystemADT infractionSystem = newInfractionSystem(minYear, maxYear);
+
+    //Chequeo inicializacion del TAD exitosa
+    if(infractionSystem==NULL || errno==ENOMEM){
+        fprintf(stderr, "Error creating infractionSystem\n");
+        closeCSV(data_files, FILES);
+        freeInfractionSystem(infractionSystem);
+        exit(ENOMEM);
+    }
+
+    int infractionSuccess=readInfraction(data_files[INFRACTIONS-1], ID_INFR, DESCR, infractionSystem); //readInfraction returns 1 if it was successfull
+    if(!infractionSuccess){
+        fprintf(stderr, "Could not read infractions\n");
+        closeRFile(infractionSystem, data_files, ERROR_FILE, FILES);
+    }
+
+    int ticketSuccess = readTickets(data_files[TICKETS-1], PLATE, DATE, ID, AGENCY, infractionSystem);  //readTickets returns 1 if it was successfull
+    if(!ticketSuccess){
+        fprintf(stderr, "Could not read tickets\n");
+        closeRFile(infractionSystem, data_files, ERROR_FILE, FILES);
+    }
+
+    closeCSV(data_files, FILES);
 
     //Inicializacion de archivos de escritura
     FILE * q1CSV= newCSV( "query1.csv", HEADER1);
