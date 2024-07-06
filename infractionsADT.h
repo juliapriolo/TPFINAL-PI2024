@@ -88,6 +88,7 @@ typedef ListQuery3 * TListQuery3;
 
 typedef struct query3{
     TListQuery3 first;
+    TListQuery3 iter;
     TListQuery3 last;
 }TQuery3;
 
@@ -126,3 +127,9 @@ void toBeginQ2(TQuery2* query2);
 int hasNextQ2(TQuery2* query2);
 void *nextQ2(TQuery2* query2);
 void freeQ2(TQuery2* query2);
+
+//funciones iteracion y free Query3 (las vamos a necesitar para el main)
+void toBeginQ3(TQuery3* query3);
+int hasNextQ3(TQuery3* query3);
+void *nextQ3(TQuery3* query3);
+void freeQ3(TQuery3* query3);

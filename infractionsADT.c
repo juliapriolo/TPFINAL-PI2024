@@ -543,7 +543,35 @@ TQuery2 *query2(infractionSystemADT system){
 }
 
 //QUERY 3: Infraccion con la patente con mayor cantidad de multas
+//funciones iteracion y free Query2 (las vamos a necesitar para el main)
 
+void toBeginQ3(TQuery3* query3){
+    query3->iter=query3->first;
+}
+
+int hasNextQ3(TQuery3* query3){
+    return query3->iter!=NULL;
+}
+
+void *nextQ3(TQuery3* query3){
+    if(!hasNextQ3(query3))
+        return NULL;
+    TListQuery3 ans=query3->iter;
+    query3->iter=query3->iter->tail;
+    return ans;
+}
+
+static void freeQ3Rec(TListQuery3 listQ3){
+    if(listQ3==NULL)
+        return ;
+    freeQ3Rec(listQ3->tail);
+    free(listQ3);
+}
+
+void freeQ3(TQuery3* query3){
+    freeQ3Rec(query3->first);
+    free(query3);
+}
 
 static TListQuery3 addQuery3(TQuery3 * myQuery, size_t queryFineAmount, char ** queryPlate, char * queryInfraction, size_t queryTotalInfractions){
     errno = 0;
