@@ -462,6 +462,36 @@ TQuery1 * query1(infractionSystemADT infractionSystem){
     return ans;
 }
 
+//QUERY 2 Infraccion mas popular por agencia emisora.
+//funciones iteracion y free Query2 (las vamos a necesitar para el main)
+
+void toBeginQ2(TQuery2* query2){    //no se si no tendria que usar TListQ2
+    query2->iter=query2->first;
+}
+
+int hasNextQ2(TQuery2* query2){
+    return query2->iter!=NULL;
+}
+
+void *nextQ2(TQuery2* query2){
+    if(!hasNextQ2(query2))
+        return NULL;
+    TListQ2 ans=query2->iter;   //no se si esto esta bien asi
+    query2->iter=query2->iter->tail;
+    return ans;
+}
+
+static void freeQ2Rec(TListQ2 listQ2){
+    if(listQ2==NULL)
+        return ;
+    freeQ2Rec(listQ2->tail);
+    free(listQ2);
+}
+
+void freeQ2(TQuery2* query2){
+    freeRec(query2->first);
+    free(query2);
+}
 
 static TQuery2 *searchMostPopular(TAgencyInfraction *infractions,size_t dim,TId *arr){
     int i=0;
