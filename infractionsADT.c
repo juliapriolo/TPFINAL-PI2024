@@ -12,6 +12,7 @@
 #define CURRENT_YEAR 2024
 #define CHECK_MEMORY(ptr) if((ptr) == NULL || errno == ENOMEM) { return NULL;}
 #define BLOCK 100;
+#define PLATE_ARR_SIZE 126
 
 enum Meses {Enero = 0,Febrero,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre};
 static char *monthNames[] = {"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
@@ -509,22 +510,20 @@ void freeQ2(TQuery2 *query2){
     free(query2);
 }
 
-static vecQuery2 *searchMostPopular(TAgencyInfraction *infractions, size_t dim, TId *arr){
-    int i = 0;
-    int maxId = 0; //el id de la infraccion con mas multas
-    int maxCount = 0; // cant mayor de multas
-    TListInfractions maxIdNode = NULL; //puntero al nodo de la infraccion con mas multas
-    TQuery2 *ans = malloc(sizeof(TQuery2));
-    CHECK_MEMORY(ans);
+static void searchMostPopular(TAgencyInfraction *infractions,size_t dim,TId *arr,char **mostPopular,int *fineCount){
+    int i=0;
+    int maxId=0;
+    int maxCount=0;
+    TListInfractions maxIdNode = NULL;
 
-    while(i < dim){ // recorro el vector de ids (infracciones)
+    while(i < dim && infractions[i].id != 0){
         if(maxCount < infractions[i].fineCount){
             maxCount = infractions[i].fineCount;
             maxId = infractions[i].id;
-            maxIdNode = binarySearch(arr, infractions[i].id, START, dim-1);
+            maxIdNode = binarySearch(arr, infractions[i].id, 0, dim-1);
         } else if(maxCount == infractions[i].fineCount){
-            maxIdNode = binarySearch(arr, maxId, START, dim-1);
-            TListInfractions currentIdNode = binarySearch(arr, infractions[i].id, START, dim-1);
+            maxIdNode = binarySearch(arr, maxId, 0, dim-1);
+            TListInfractions currentIdNode = binarySearch(arr, infractions[i].id, 0, dim-1);
             if(strcasecmp(maxIdNode->description, currentIdNode->description) > 0){ // Me quedo con el orden alfabetico
                 maxId = infractions[i].id;
                 maxCount = infractions[i].fineCount;
@@ -533,34 +532,35 @@ static vecQuery2 *searchMostPopular(TAgencyInfraction *infractions, size_t dim, 
         }
         i++;
     }
-    ans->dataVec[0].fineCount = maxCount;
-    ans->dataVec[0].mostPopularInf = malloc(strlen(maxIdNode->description) + 1);
-    CHECK_MEMORY(ans->dataVec[0].mostPopularInf);
-    strcpy(ans->dataVec[0].mostPopularInf, maxIdNode->description);
-    return ans->dataVec[0];
+
+    *fineCount = maxCount;
+    *mostPopular = malloc(strlen(maxIdNode->description) + 1);
+    strcpy(*mostPopular,maxIdNode->description);
+    return;
 }
 
 //QUERY 2
 
-TQuery2 *query2(infractionSystemADT system){ 
-    errno = 0;
-    TQuery2 *newQ2 = calloc(system->dimAgency, sizeof(TQuery2));
-    CHECK_MEMORY(newQ2);
-
-    toBeginByAgency(system);
-    size_t i = 0;
-
-    while (hasNextByAgency(system)) {
-        if (system->iterAgency->infractions != NULL) { // si tiene al menos una infraccion, entra
-            newQ2->dataVec[i] = searchMostPopular(system->iterAgency->infractions, system->dim, system->arrId);
-            newQ2->dataVec[i].agency = system->iterAgency->agencyName;
+TQuery2 *query2(infractionSystemADT system){
+    TQuery2Arr *newQ2 = calloc(system->dimAgency, sizeof(*newQ2));
+    TListAgency aux = system->firstAgency;
+    int i=0;
+    while(aux != NULL){
+        if(aux->infractions != NULL){
+            char *mostPopular = NULL;
+            int fineCount = 0;
+            searchMostPopular(aux->infractions, system->dim, system->arrId,&mostPopular,&fineCount);
+            newQ2[i].fineCount = fineCount;
+            newQ2[i].mostPopularInf = mostPopular;
+            newQ2[i].agency = malloc(strlen(aux->agencyName) + 1);
+            strcpy( newQ2[i].agency,aux->agencyName);     
         }
-        nextByAgency(system);
+        aux = aux->tail;
         i++;
     }
-
     return newQ2;
 }
+
 
 void freeQ3(TQuery3 * query3){
     for(size_t i = 0; i < query3->dim; i++){
