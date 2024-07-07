@@ -6,10 +6,10 @@
 #include "htmlTable.h"
 #include <strings.h>
 
-#define HEADER1 "infraction;tickets\n"
-#define HEADER2 "issuingAgency;infraction;tickets\n"
-#define HEADER3 "infraction;plate;tickets\n"
-#define HEADER4 "year;ticketsTop1Month;ticketsTop2Month;ticketsTop3Month\n"
+#define HEADER1 "infraction;tickets"
+#define HEADER2 "issuingAgency;infraction;tickets"
+#define HEADER3 "infraction;plate;tickets"
+#define HEADER4 "year;ticketsTop1Month;ticketsTop2Month;ticketsTop3Month"
 #define DELIMITER ";"
 #define CANT_QUERY 4
 #define FILES 2
@@ -143,12 +143,11 @@ int main(int argc, char *argv[]){
     char infractionq1[MAX_LINE];
     char totalq1[MAX_LINE];
 
+
     TQuery1 * q1 = query1(infractionSystem);
 
     toBeginQ1(q1);
-
-    //Encabezado archivo csv:
-    fprintf(filesCSV[FIRST], "infraction;totaltickets\n");    
+ 
 
     while ( hasNextQ1(q1)){
         fprintf(filesCSV[FIRST], "%s;%ld\n" , q1->iter->infraction, q1->iter->totalInfracctions);     
@@ -161,24 +160,24 @@ int main(int argc, char *argv[]){
         nextQ1(q1);
     }
     freeQ1(q1);
-    
+    fclose(filesCSV[FIRST]);
     
     //Carga de Query 2
+    int dim = dimAgency(infractionSystem);
     TQuery2 * q2 = query2(infractionSystem);
 
-    // Encabezados CSV
-    fprintf(filesCSV[SECOND], "issuingAgency;infraction;tickets\n");
+
     char agencyq2[MAX_LINE];
     char infractionq2[MAX_LINE];
     char ticketsq2[MAX_LINE];
 
-    for(size_t i = 0; i < q2->dim; i++) {
-        fprintf(filesCSV[SECOND], "%s;%s;%ld \n", q2->dataVec[i].agency, q2->dataVec[i].mostPopularInf, q2->dataVec[i].fineCount);
+    for(size_t i = 0; i < dim; i++) {
+        fprintf(filesCSV[SECOND], "%s;%s;%ld\n", q2[i].agency, q2[i].mostPopularInf, q2[i].fineCount);
 
         // Preparar para HTML
-        sprintf(agencyq2, "%s", q2->dataVec[i].agency);
-        sprintf(infractionq2, "%s", q2->dataVec[i].mostPopularInf);
-        sprintf(ticketsq2, "%ld", q2->dataVec[i].fineCount);
+        sprintf(agencyq2, "%s", q2[i].agency);
+        sprintf(infractionq2, "%s", q2[i].mostPopularInf);
+        sprintf(ticketsq2, "%ld", q2[i].fineCount);
 
         // Agregar fila HTML
         addHTMLRow(filesHTML[FIRST], agencyq2, infractionq2, ticketsq2);
@@ -189,6 +188,7 @@ int main(int argc, char *argv[]){
     //char infractionq3[MAX_LINE];
     //char plateq3[MAX_LINE];
     //char totalq3[MAX_LINE];
+    // puts("Empezando Query3");
 
     TQuery3 * q3 = query3(infractionSystem);
 
@@ -205,15 +205,14 @@ int main(int argc, char *argv[]){
 
     //Carga el Query 4
     TQuery4 * q4 = query4(infractionSystem);
+    int q4Dim = dimArr(infractionSystem);
 
-    //encabezdo
-    fprintf(filesCSV[FOURTH], "year;ticketsTop1Month;ticketsTop2Month;ticketsTop3Month\n");
     char year[MAX_LINE];
     char topMonth1[MAX_LINE];
     char topMonth2[MAX_LINE];
     char topMonth3[MAX_LINE];
 
-    for(size_t i = 0; i < q4->dim; i++){
+    for(size_t i = 0; i < q4Dim; i++){
         fprintf(filesCSV[FOURTH], "%ld;%s;%s;%s\n", q4->vec[i].year, q4->vec[i].monthTop1, q4->vec[i].monthTop2, q4->vec[i].monthTop3);
 
         sprintf(year, "%ld", q4->vec[i].year);
@@ -226,7 +225,6 @@ int main(int argc, char *argv[]){
     freeQ4(q4);
 
     closeWFile(infractionSystem, filesCSV, filesHTML, OK, CANT_QUERY);
-
     return OK;
 
 }
@@ -259,7 +257,6 @@ int readInfraction(FILE *file, int idColumn, int infractionColumn, infractionSys
         }
 
         if (infraction != NULL) {
-            //printf("Agregando infraccion de id:%d\n",id);
             succed = addInfraction(infractionSystem, infraction, id);
 
             // if (!succed) {
