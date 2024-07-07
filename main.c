@@ -29,7 +29,7 @@
 
 enum files{FIRST = 0, SECOND, THIRD, FOURTH};    //Enum para buscar los archivos filescsv y fileshtml
 
-enum programArguments{PROGRAM = 0, INFRACTIONS, TICKETS, MIN_YEAR, MAX_YEAR};  
+enum programArguments{PROGRAM = 0,TICKETS,INFRACTIONS, MIN_YEAR, MAX_YEAR};  
 
 #ifdef NY
 #define MAX_LEN_AGENCY 35 //largo maximo para una agencia en Nueva York
@@ -84,10 +84,10 @@ int main(int argc, char *argv[]){
     //Inicializacion de archivos de lectura
     FILE * infractions = fopen(argv[INFRACTIONS], "r");              // archivo de infractions. Definir INFRACTIONS y TICKETS
     FILE * tickets = fopen( argv[TICKETS], "r");                      // archivo de tickets
-    FILE * data_files[] = {infractions, tickets};
+    FILE * data_files[] = {tickets,infractions};
 
     //Chequeo de open files exitoso
-    if (data_files[INFRACTIONS - 1] == NULL || data_files[TICKETS - 1]) {
+    if (data_files[INFRACTIONS - 1] == NULL || data_files[TICKETS - 1] == NULL) {
         fprintf(stderr, "Error opening files\n");           
         closeCSV(data_files, FILES);                                
         exit(ERROR_FILE);                                            //No se bien si hay que poner ese error
