@@ -31,6 +31,8 @@ int addAgency(infractionSystemADT infractionSystem, char * agency, size_t id);
 */
 int addTicket(infractionSystemADT infractionSystem, size_t id, char *plate);
 
+int addDate(infractionSystemADT system,int year,int month);
+
 //funciones de iteracion para la lista de infracciones
 void toBegin(infractionSystemADT infractionSystem);
 
@@ -63,7 +65,7 @@ typedef struct TQuery1{
     TListQ1 iter;
 }TQuery1;
 
-typedef struct query2{
+typedef struct query2Arr{
     char *agency;
     char *mostPopularInf;
     size_t fineCount;
@@ -126,3 +128,5 @@ void toBeginQ3(TQuery3* query3);
 int hasNextQ3(TQuery3* query3);
 void *nextQ3(TQuery3* query3);
 void freeQ3(TQuery3* query3);
+
+void freeQ4(TQuery4* query4);

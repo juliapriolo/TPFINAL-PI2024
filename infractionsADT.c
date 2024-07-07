@@ -11,7 +11,7 @@
 #define START 0
 #define CURRENT_YEAR 2024
 #define CHECK_MEMORY(ptr) if((ptr) == NULL || errno == ENOMEM) { return NULL;}
-#define BLOCK 100;
+#define BLOCK 100
 #define PLATE_ARR_SIZE 126
 
 enum Meses {Enero = 0,Febrero,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre};
@@ -219,20 +219,6 @@ static TListAgency addAgencyIter(TListAgency list, char *agName, size_t id, size
     return list;
 }
 
-//0 si no agrego, 1 si agrego una nueva agencia, 2 si la agencia ya estaba
-int addAgency(infractionSystemADT infractionSystem, char * agency, size_t id){
-    size_t added = 0;
-    TListInfractions ticket = binarySearch(infractionSystem->arrId,id,0,infractionSystem->dim-1);
-    if(ticket != NULL){
-        infractionSystem->firstAgency = addAgencyIter(infractionSystem->firstAgency, agency, id,infractionSystem->dim,&added);
-        if(added == 1){
-            infractionSystem->dimAgency++;
-        }
-    }
-    return added;
-}
-
-
 static TListInfractions binarySearch(TId *arr, size_t id, size_t left, size_t right){
     while(left <= right){
         size_t mid = left + (right - left)/2;
@@ -248,6 +234,21 @@ static TListInfractions binarySearch(TId *arr, size_t id, size_t left, size_t ri
     }
     return NULL;
 }
+
+
+//0 si no agrego, 1 si agrego una nueva agencia, 2 si la agencia ya estaba
+int addAgency(infractionSystemADT infractionSystem, char * agency, size_t id){
+    size_t added = 0;
+    TListInfractions ticket = binarySearch(infractionSystem->arrId,id,0,infractionSystem->dim-1);
+    if(ticket != NULL){
+        infractionSystem->firstAgency = addAgencyIter(infractionSystem->firstAgency, agency, id,infractionSystem->dim,&added);
+        if(added == 1){
+            infractionSystem->dimAgency++;
+        }
+    }
+    return added;
+}
+
 
 /*
     Buscar en el vector de ids si el id que le pasan es valido, lo busca con busqueda binaria.
@@ -542,7 +543,7 @@ static void searchMostPopular(TAgencyInfraction *infractions,size_t dim,TId *arr
 //QUERY 2
 
 TQuery2 *query2(infractionSystemADT system){
-    TQuery2Arr *newQ2 = calloc(system->dimAgency, sizeof(*newQ2));
+    TQuery2 *newQ2 = calloc(system->dimAgency, sizeof(*newQ2));
     TListAgency aux = system->firstAgency;
     int i=0;
     while(aux != NULL){
@@ -550,10 +551,10 @@ TQuery2 *query2(infractionSystemADT system){
             char *mostPopular = NULL;
             int fineCount = 0;
             searchMostPopular(aux->infractions, system->dim, system->arrId,&mostPopular,&fineCount);
-            newQ2[i].fineCount = fineCount;
-            newQ2[i].mostPopularInf = mostPopular;
-            newQ2[i].agency = malloc(strlen(aux->agencyName) + 1);
-            strcpy( newQ2[i].agency,aux->agencyName);     
+            newQ2->dataVec[i].fineCount = fineCount;
+            newQ2->dataVec[i].mostPopularInf = mostPopular;
+            newQ2->dataVec[i].agency = malloc(strlen(aux->agencyName) + 1);
+            strcpy( newQ2->dataVec[i].agency,aux->agencyName);     
         }
         aux = aux->tail;
         i++;
@@ -610,7 +611,7 @@ TQuery3 * query3(infractionSystemADT system){
             addQuery3(currentTicket, &qFineAmount, &qPlate);
 
             if(ans->vectorDeDatos == NULL || qValidInfrAmmount > ans->dim){
-                size_t newDim = BLOCK + ans->dim;
+                size_t newDim = (BLOCK + ans->dim);
 
                 ans->vectorDeDatos = realloc(ans->vectorDeDatos, newDim * sizeof(vecQuery3));
                 CHECK_MEMORY(ans->vectorDeDatos);
@@ -702,6 +703,17 @@ TQuery4 *query4(infractionSystemCDT *infractionSystem) {
 
     return ans;
 }
+
+void freeQ4(TQuery4* query4){
+    for(size_t i = 0; i < query4->dim; i++){
+        free(query4->vec[i].monthTop1);
+        free(query4->vec[i].monthTop2);
+        free(query4->vec[i].monthTop3);
+    }
+    free(query4->vec);
+    free(query4);
+}
+
 
 size_t dimAgency(infractionSystemADT system){
     return system->dimAgency;

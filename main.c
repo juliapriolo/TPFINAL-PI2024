@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "infractionsADT.h"
 #include <errno.h>
 #include "htmlTable.h"
@@ -27,7 +28,7 @@
 
 enum files{FIRST = 0, SECOND, THIRD, FOURTH};    //Enum para buscar los archivos filescsv y fileshtml
 
-enum arguments{PROGRAM = 0, INFRACTIONS, TICKETS, MIN_YEAR, MAX_YEAR};  
+enum programArguments{PROGRAM = 0, INFRACTIONS, TICKETS, MIN_YEAR, MAX_YEAR};  
 
 #ifdef NY
 #define MAX_LEN_AGENCY 35 //largo maximo para una agencia en Nueva York
@@ -48,7 +49,8 @@ void closeCSV(FILE *files[], int fileQuantity); //funcion que cierra los archivo
 void closeHTML(htmlTable files[], int fileQuantity);    //funcion que cierra los archivos html que estan en el arreglo files
 int valid( const char* s);  //se asegura que el string sea todo de numeros
 void closeRFile(infractionSystemADT infractionSystem, FILE *data_files[], int error, int fileQuantity);
-void closeWFile(infractionSystemADT infractionSystem, FILE *csvFile[], FILE *htmlFile, int error, int queryQuantity);
+void closeWFile(infractionSystemADT infractionSystem, FILE *csvFile[], htmlTable htmlFile[], int error, int queryQuantity);
+
 
 int main(int argc, char *argv[]){
 
@@ -137,8 +139,8 @@ int main(int argc, char *argv[]){
     }
 
     // Carga de Query 1 
-    char infraction[MAX_LINE];
-    char total[MAX_LINE];
+    char infractionq1[MAX_LINE];
+    char totalq1[MAX_LINE];
 
     TQuery1 * q1 = query1(infractionSystem);
 
@@ -148,12 +150,12 @@ int main(int argc, char *argv[]){
     fprintf(filesCSV[FIRST], "infraction;totaltickets\n");    
 
     while ( hasNextQ1(q1)){
-        fprintf(filesCSV[FIRST], "%s;%ld\n" , q1->iter->infraction, q1->iter->totalInfracctions);     
+        fprintf(filesCSV[FIRST], "%s;%lld\n" , q1->iter->infraction, q1->iter->totalInfracctions);     
         //No se bien que argumento iria en filesCSV
-        sprintf (infraction, "%s", q1->iter->infraction);
-        sprintf (total, "%ld", q1->iter->totalInfracctions);
+        sprintf (infractionq1, "%s", q1->iter->infraction);
+        sprintf (totalq1, "%lld", q1->iter->totalInfracctions);
         //Agrego una nueva fila al archivo
-        addHTMLRow(filesHTML[FIRST], infraction, total);     
+        addHTMLRow(filesHTML[FIRST], infractionq1, totalq1);     
 
         nextQ1(q1);
     }
@@ -165,27 +167,27 @@ int main(int argc, char *argv[]){
 
     // Encabezados CSV
     fprintf(filesCSV[SECOND], "issuingAgency;infraction;tickets\n");
-    char agency[MAX_LINE];
-    char infraction[MAX_LINE];
-    char tickets[MAX_LINE];
+    char agencyq2[MAX_LINE];
+    char infractionq2[MAX_LINE];
+    char ticketsq2[MAX_LINE];
 
     for(size_t i = 0; i < q2->dim; i++) {
-        fprintf(filesCSV[SECOND], "%s;%s;%ld \n", q2->dataVec[i].agency, q2->dataVec[i].mostPopularInf, q2->dataVec[i].fineCount);
+        fprintf(filesCSV[SECOND], "%s;%s;%lld \n", q2->dataVec[i].agency, q2->dataVec[i].mostPopularInf, q2->dataVec[i].fineCount);
 
         // Preparar para HTML
-        sprintf(agency, "%s", q2->dataVec[i].agency);
-        sprintf(infraction, "%s", q2->dataVec[i].mostPopularInf);
-        sprintf(tickets, "%ld", q2->dataVec[i].fineCount);
+        sprintf(agencyq2, "%s", q2->dataVec[i].agency);
+        sprintf(infractionq2, "%s", q2->dataVec[i].mostPopularInf);
+        sprintf(ticketsq2, "%lld", q2->dataVec[i].fineCount);
 
         // Agregar fila HTML
-        addHTMLRowQuery2(filesHTML[FIRST], agency, infraction, tickets);
+        addHTMLRow(filesHTML[FIRST], agencyq2, infractionq2, ticketsq2);
     }
     freeQ2(q2);
 
-    // Carga de Query 3 
-    char infraction[MAX_LINE];
-    char plate[MAX_LINE];
-    char total[MAX_LINE];
+    // Carga de Query 3 //NO USA ESTOS CHAR
+    //char infractionq3[MAX_LINE];
+    //char plateq3[MAX_LINE];
+    //char totalq3[MAX_LINE];
 
     TQuery3 * q3 = query3(infractionSystem);
 
@@ -193,7 +195,7 @@ int main(int argc, char *argv[]){
     fprintf(filesCSV[THIRD], "infraction;plate;tickets\n");    
 
     for(size_t i = 0; i < q3->dim; i++){
-        fprintf(filesCSV[THIRD], "%s;%s;%ld\n", q3->vectorDeDatos[i].infraction, q3->vectorDeDatos[i].plate, q3->vectorDeDatos[i].fineAmount);
+        fprintf(filesCSV[THIRD], "%s;%s;%lld\n", q3->vectorDeDatos[i].infraction, q3->vectorDeDatos[i].plate, q3->vectorDeDatos[i].fineAmount);
         // Agregar fila HTML
         addHTMLRow(filesHTML[THIRD], q3->vectorDeDatos[i].infraction, q3->vectorDeDatos[i].plate, q3->vectorDeDatos[i].fineAmount);
     }
@@ -211,12 +213,12 @@ int main(int argc, char *argv[]){
     char topMonth3[MAX_LINE];
 
     for(size_t i = 0; i < q4->dim; i++){
-        fprintf(filesCSV[FOURTH], "%ld;%s;%s;%s\n", q4->vec[i].year, q4->vec[i].monthTop1, q4->vec[i].monthTop2, q4->vec[i].monthTop3);
+        fprintf(filesCSV[FOURTH], "%lld;%s;%s;%s\n", q4->vec[i].year, q4->vec[i].monthTop1, q4->vec[i].monthTop2, q4->vec[i].monthTop3);
 
-        sprintf(year, "%ld", q4->vec[i].year);
-        sprintf(topMonth1, "%ld", q4->vec[i].monthTop1);
-        sprintf(topMonth2, "%ld", q4->vec[i].monthTop2);
-        sprintf(topMonth3, "%ld", q4->vec[i].monthTop3);
+        sprintf(year, "%lld", q4->vec[i].year);
+        sprintf(topMonth1, "%s", q4->vec[i].monthTop1);
+        sprintf(topMonth2, "%s", q4->vec[i].monthTop2);
+        sprintf(topMonth3, "%s", q4->vec[i].monthTop3);
 
         addHTMLRow(filesHTML[FOURTH], year, topMonth1, topMonth2, topMonth3);
     }
@@ -365,7 +367,7 @@ void closeRFile(infractionSystemADT infractionSystem, FILE *data_files[], int er
 }
 
 // Cierra los archivos de escritura y libera el sistema, en caso de que halla un error, aborta
-void closeWFile(infractionSystemADT infractionSystem, FILE *csvFile[], FILE *htmlFile, int error, int queryQuantity){
+void closeWFile(infractionSystemADT infractionSystem, FILE *csvFile[], htmlTable htmlFile[], int error, int queryQuantity){
     freeInfractionSystem(infractionSystem);
     closeCSV(csvFile, queryQuantity);
     closeHTML(htmlFile, queryQuantity);
