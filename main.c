@@ -245,7 +245,7 @@ int readInfraction(FILE *file, int idColumn, int infractionColumn, infractionSys
             if (columnIdx == idColumn) {
                 id = atoi(token);
             } else if (columnIdx == infractionColumn){
-                char *newline = strchr(token,'\n'); //HACER UNA FUNCION
+                char *newline = strchr(token,'\n');
                 if(newline){
                     *newline = '\0';
                 }
@@ -256,11 +256,12 @@ int readInfraction(FILE *file, int idColumn, int infractionColumn, infractionSys
         }
 
         if (infraction != NULL) {
+            //printf("Agregando infraccion de id:%d\n",id);
             succed = addInfraction(infractionSystem, infraction, id);
 
-            if (!succed) {
-                printf("Error al agregar infracción: %s\n", infraction);    //CAMBIAR      
-            }
+            // if (!succed) {
+            //     printf("Error al agregar infracción: %s\n", infraction);    //CAMBIAR      
+            // }
         }
     }
     return succed;
@@ -270,6 +271,7 @@ int readTickets(FILE *file, int plateColumn, int dateColumn, int idColumn, int a
     char currentLine[MAX_LINE];
     int succesAgency = 0;
     int succesPlate = 0;
+    int succesDate = 0;
 
     fgets(currentLine, MAX_LINE, file);
 
@@ -279,7 +281,6 @@ int readTickets(FILE *file, int plateColumn, int dateColumn, int idColumn, int a
         int month = 0;
         int id = 0;
         char *plate = NULL;
-        char *date = NULL;
         char *agency = NULL;
     
         char *token = strtok(currentLine,DELIMITER);
@@ -296,27 +297,31 @@ int readTickets(FILE *file, int plateColumn, int dateColumn, int idColumn, int a
                 }
                 agency = token;
             }else if(columnIdx == dateColumn){
-                sscanf(token, "%d-%d", &year, &month); //PROBAR QUE FUNCIONES  
+                sscanf(token, "%d-%d", &year, &month);//PROBAR QUE FUNCIONES  
             }
             token = strtok(NULL,DELIMITER);
             columnIdx++;
         }
         if(agency != NULL){
             succesAgency = addAgency(system,agency,id);
-            if(!succesAgency){
-                printf("Error al agregar agencia: %s\n", agency);   //CAMBIAR         
+            // if(!succesAgency){
+            //     printf("Error al agregar agencia: %s\n", agency);   //CAMBIAR         
 
-            }
+            // }
         }
         if(plate != NULL){
-           succesPlate = addTicket(system,id,plate);
-            if(!succesPlate){
-                printf("Error al agregar patente: %s\n", plate);    //CAMBIAR     
+            succesPlate = addTicket(system,id,plate);
+            // if(!succesPlate){
+            //     printf("Error al agregar patente: %s\n", plate);    //CAMBIAR     
 
-            }
+            // }
         }
+        if(year != 0 && month != 0){
+            succesDate = addDate(system,year,month);
+        }
+        
     }
-    return (succesAgency && succesPlate);
+    return (succesAgency && succesPlate && succesDate);
 }
 
         
