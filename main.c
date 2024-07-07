@@ -16,6 +16,7 @@
 #define INVALID_YEAR -1
 #define ERROR_PAR 1
 #define ERROR_FILE 2
+#define ERROR_AG 3
 #define OK 0
 
 

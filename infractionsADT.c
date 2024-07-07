@@ -202,6 +202,10 @@ static TListAgency addAgencyRec(TListAgency list, char * agName,size_t id,size_t
 //0 si no agrego, 1 si agrego una nueva agencia, 2 si la agencia ya estaba
 int addAgency(infractionSystemADT infractionSystem, char * agency, size_t id){
     size_t added = 0;
+    TListInfractions aux = binarySearch(infractionSystem->arrId, id, 0, infractionSystem->dim-1);
+    if(aux==NULL){
+        return added;
+    }
     infractionSystem->firstAgency = addAgencyRec(infractionSystem->firstAgency, agency, id,infractionSystem->dim,&added);
     return added;
 }
@@ -260,7 +264,7 @@ int addTicket(infractionSystemADT infractionSystem, size_t id,char *plate){
     if(infractionSystem->arrId == NULL){
         return added;
     }
-    TListInfractions ticket = binarySearch(infractionSystem->arrId,id,0,infractionSystem->dim-1);
+    TListInfractions ticket = binarySearch(infractionSystem->arrId,id,0,infractionSystem->dim-1);   //MAGIC NUMBER
     if(ticket != NULL){
         ticket->firstTicket = addTicketRec(ticket->firstTicket,plate,&added);
         ticket->totalFines += added;
