@@ -3,6 +3,7 @@
 #include <string.h>
 #include <errno.h>
 #include "infractionsADT.h"
+#include <strings.h>
 
 #define INVALID_YEAR -1
 #define MONTHS 12

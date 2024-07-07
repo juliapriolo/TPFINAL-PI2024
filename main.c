@@ -4,6 +4,7 @@
 #include "infractionsADT.h"
 #include <errno.h>
 #include "htmlTable.h"
+#include <strings.h>
 
 #define HEADER1 "infraction;tickets\n"
 #define HEADER2 "issuingAgency;infraction;tickets\n"
@@ -150,10 +151,10 @@ int main(int argc, char *argv[]){
     fprintf(filesCSV[FIRST], "infraction;totaltickets\n");    
 
     while ( hasNextQ1(q1)){
-        fprintf(filesCSV[FIRST], "%s;%lld\n" , q1->iter->infraction, q1->iter->totalInfracctions);     
+        fprintf(filesCSV[FIRST], "%s;%ld\n" , q1->iter->infraction, q1->iter->totalInfracctions);     
         //No se bien que argumento iria en filesCSV
         sprintf (infractionq1, "%s", q1->iter->infraction);
-        sprintf (totalq1, "%lld", q1->iter->totalInfracctions);
+        sprintf (totalq1, "%ld", q1->iter->totalInfracctions);
         //Agrego una nueva fila al archivo
         addHTMLRow(filesHTML[FIRST], infractionq1, totalq1);     
 
@@ -172,12 +173,12 @@ int main(int argc, char *argv[]){
     char ticketsq2[MAX_LINE];
 
     for(size_t i = 0; i < q2->dim; i++) {
-        fprintf(filesCSV[SECOND], "%s;%s;%lld \n", q2->dataVec[i].agency, q2->dataVec[i].mostPopularInf, q2->dataVec[i].fineCount);
+        fprintf(filesCSV[SECOND], "%s;%s;%ld \n", q2->dataVec[i].agency, q2->dataVec[i].mostPopularInf, q2->dataVec[i].fineCount);
 
         // Preparar para HTML
         sprintf(agencyq2, "%s", q2->dataVec[i].agency);
         sprintf(infractionq2, "%s", q2->dataVec[i].mostPopularInf);
-        sprintf(ticketsq2, "%lld", q2->dataVec[i].fineCount);
+        sprintf(ticketsq2, "%ld", q2->dataVec[i].fineCount);
 
         // Agregar fila HTML
         addHTMLRow(filesHTML[FIRST], agencyq2, infractionq2, ticketsq2);
@@ -195,7 +196,7 @@ int main(int argc, char *argv[]){
     fprintf(filesCSV[THIRD], "infraction;plate;tickets\n");    
 
     for(size_t i = 0; i < q3->dim; i++){
-        fprintf(filesCSV[THIRD], "%s;%s;%lld\n", q3->vectorDeDatos[i].infraction, q3->vectorDeDatos[i].plate, q3->vectorDeDatos[i].fineAmount);
+        fprintf(filesCSV[THIRD], "%s;%s;%ld\n", q3->vectorDeDatos[i].infraction, q3->vectorDeDatos[i].plate, q3->vectorDeDatos[i].fineAmount);
         // Agregar fila HTML
         addHTMLRow(filesHTML[THIRD], q3->vectorDeDatos[i].infraction, q3->vectorDeDatos[i].plate, q3->vectorDeDatos[i].fineAmount);
     }
@@ -213,9 +214,9 @@ int main(int argc, char *argv[]){
     char topMonth3[MAX_LINE];
 
     for(size_t i = 0; i < q4->dim; i++){
-        fprintf(filesCSV[FOURTH], "%lld;%s;%s;%s\n", q4->vec[i].year, q4->vec[i].monthTop1, q4->vec[i].monthTop2, q4->vec[i].monthTop3);
+        fprintf(filesCSV[FOURTH], "%ld;%s;%s;%s\n", q4->vec[i].year, q4->vec[i].monthTop1, q4->vec[i].monthTop2, q4->vec[i].monthTop3);
 
-        sprintf(year, "%lld", q4->vec[i].year);
+        sprintf(year, "%ld", q4->vec[i].year);
         sprintf(topMonth1, "%s", q4->vec[i].monthTop1);
         sprintf(topMonth2, "%s", q4->vec[i].monthTop2);
         sprintf(topMonth3, "%s", q4->vec[i].monthTop3);
