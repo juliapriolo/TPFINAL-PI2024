@@ -99,19 +99,21 @@ infractionSystemADT newInfractionSystem(size_t minYear, size_t maxYear){
 
 //si a>b devuelve un numero mayor a 0, si a<b,, devuelve un numero 
 //menor a 0, y si son iguales devuelve 0
-static int cmpIds(const void *a, const void *b){
+static int cmpIds(const void *a, const void *b){ //CAMBIAR
     const TId *idA = (const TId *)a;
     const TId *idB = (const TId *)b;
     return (idA->id - idB->id);
 }
 
 
-static TId *fillArr(TId *array, size_t dim, TListInfractions pInfraction){
+static TId *fillArr(TId *array, size_t dim, TListInfractions *pInfraction){
     array  = realloc(array,sizeof(*array) * dim);
     errno=0;
-    CHECK_MEMORY(array);
-    array[dim-1].pNode = pInfraction;
-    array[dim-1].id = pInfraction->id;
+    if(array==NULL || errno==ENOMEM){
+        return NULL;
+    }
+    array[dim-1].pNode = *pInfraction;
+    array[dim-1].id = (*pInfraction)->id;
     qsort(array, dim, sizeof(TId), cmpIds);
     return array;
 }
@@ -146,7 +148,7 @@ int addInfraction(infractionSystemADT infractionSystem, char *description, size_
 
     if(added){
         infractionSystem->dim++;
-        infractionSystem->arrId = fillArr(infractionSystem->arrId, infractionSystem->dim, pInfractions);
+        infractionSystem->arrId = fillArr(infractionSystem->arrId, infractionSystem->dim, &pInfractions);
     }
 
     return added;
