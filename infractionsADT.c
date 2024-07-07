@@ -333,13 +333,6 @@ static void freeLInfractionsRec(TListInfractions list){
     free(list);
 }
 
-static void freeID(TId * arreglo, size_t dim){
-    for(int i = 0; i < dim; i++){
-        free(arreglo[i].pNode);            //nose si hay que hacer arreglo[i].id o solo arreglo[i] !!!!
-    }
-    free(arreglo);
-}
-
 static void freeArrYears(size_t **arrYears, size_t minYear, size_t maxYear) {   
     for (size_t i = minYear; i < maxYear; i++) {
         free(arrYears[i-minYear]);
