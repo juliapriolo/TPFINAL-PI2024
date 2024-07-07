@@ -405,6 +405,9 @@ static void freeLAgencyRec(TListAgency list){
 }
 
 void freeInfractionSystem(infractionSystemADT infractionSystem){
+    if(infractionSystem == NULL){
+        return;
+    }
     freeLInfractionsRec(infractionSystem->firstInfraction);
     freeLAgencyRec(infractionSystem->firstAgency);
     free(infractionSystem->arrId);
