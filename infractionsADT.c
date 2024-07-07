@@ -4,6 +4,7 @@
 #include <errno.h>
 #include "infractionsADT.h"
 
+#define INVALID_YEAR -1
 #define MONTHS 12
 #define MAX_AG 30 //Despues cambiar el valor al que deberia ser
 #define EMPTY "EMPTY"
@@ -614,7 +615,7 @@ TQuery4 *query4(infractionSystemCDT *infractionSystem) {
     CHECK_MEMORY(ans);
 
     ans->vec = calloc(dim,sizeof(*(ans->vec)));
-    iCHECK_MEMORY(ans->vec);
+    CHECK_MEMORY(ans->vec);
 
     for (size_t i = 0; i < dim; i++) {
         char *m1 = NULL, *m2 = NULL, *m3 = NULL;

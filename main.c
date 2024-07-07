@@ -56,7 +56,7 @@ int main(int argc, char *argv[]){
         fprintf(stderr, "Incorrect amount of arguments supplied\n");
         exit(ERROR_PAR);
     }
-    int minYear, maxYear = INVALID_YEAR; //no estamos seguras si hay que inicializar el minYear o no
+    int minYear, maxYear = INVALID_YEAR; 
 
     if ( argc >= MIN_ARG ){ //Vemos si minYear es un tipo de dato valido
         if( !valid( argv[MIN_YEAR])){
@@ -296,7 +296,7 @@ int readTickets(FILE *file, int plateColumn, int dateColumn, int idColumn, int a
                 }
                 agency = token;
             }else if(columnIdx == dateColumn){
-                sscanf(token, "%d-%d", &year, &month);//PROBAR QUE FUNCIONES  
+                sscanf(token, "%d-%d", &year, &month); //PROBAR QUE FUNCIONES  
             }
             token = strtok(NULL,DELIMITER);
             columnIdx++;
