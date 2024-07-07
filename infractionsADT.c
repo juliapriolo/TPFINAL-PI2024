@@ -524,7 +524,7 @@ void freeQ3(TQuery3 * query3){
 
 //QUERY 3: Infraccion con la patente con mayor cantidad de multas
 //funciones iteracion y free Query2 (las vamos a necesitar para el main)
-void addQuery3(TListTickets ticketList, size_t * maxFineAmount, char * *maxPlate){
+static void addQuery3(TListTickets ticketList, size_t * maxFineAmount, char * *maxPlate){
     while(ticketList != NULL){
         if((*maxFineAmount) < ticketList->fineCount){
             (*maxFineAmount) = ticketList->fineCount;
