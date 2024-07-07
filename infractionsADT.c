@@ -255,40 +255,64 @@ static TListInfractions binarySearch(TId *arr, size_t id, size_t left, size_t ri
     si la patente no se encuentra entonces la añade de forma alfabetica, sino, aumenta el contador de multas para dicha patente. En ambos casos retorna 1.
 */
 
-static TListTickets addTicketRec(TListTickets listTick, char *plate, size_t *added){
+static TListTickets addTicketIter(TListTickets listTick, char *plate, size_t *added,TListTickets *auxTicket) {
+    TListTickets current = listTick;
+    TListTickets previous;
     int c;
-    if(listTick == NULL || (c = strcasecmp(plate, listTick->plate)) < 0 ){
-        errno = 0;
-        TListTickets aux = calloc(1, sizeof(TTickets)); // para iniciar el count en 0
-        CHECK_MEMORY(aux);
 
-        aux->plate = malloc(((strlen(plate)) + 1));
-        CHECK_MEMORY(aux->plate);
-
-        strcpy(aux->plate, plate);
-        aux->fineCount++;
-        aux->tail = listTick;
-        (*added) = 1; // se agrego una nueva patente y una multa
-        return aux;
+    while (current != NULL && (c = strcasecmp(plate, current->plate)) > 0) {
+        previous = current;
+        current = current->tail;
     }
-    if(c == 0){
-        listTick->fineCount++; // como la patente ya estaba, incremento en 1 la cant de multas
-        (*added) = 1; // no se agrego una nueva patente pero si una multa
+
+    if (current != NULL && c == 0) {
+        current->fineCount++;
+        *added = 2;
         return listTick;
     }
-    listTick->tail = addTicketRec(listTick->tail, plate, added);
+
+    errno = 0;
+    TListTickets newTicket = calloc(1, sizeof(TTickets));
+    if (newTicket == NULL || errno == ENOMEM) {
+        return NULL;
+    }
+    newTicket->plate = malloc((strlen(plate) + 1));
+    if (newTicket->plate == NULL || errno == ENOMEM) {
+        free(newTicket);
+        return NULL;
+    }
+    strcpy(newTicket->plate, plate);
+    newTicket->fineCount = 1;
+    newTicket->tail = current;
+
+    if (current == listTick) {
+        listTick = newTicket;
+        *auxTicket = newTicket;
+    } else {
+        previous->tail = newTicket;
+        *auxTicket = previous;
+    }
+    *added = 1;
     return listTick;
 }
 
 int addTicket(infractionSystemADT infractionSystem, size_t id,char *plate){
     size_t added = 0;
-    if(infractionSystem->arrId == NULL){
-        return added;
-    }
-    TListInfractions ticket = binarySearch(infractionSystem->arrId,id,0,infractionSystem->dim-1);   //MAGIC NUMBER
+    int arrPlateIsNull = 0;
+    static TListTickets arrPlates[PLATE_ARR_SIZE];
+    int letter = plate[0]-1;
+    TListTickets auxTicket;
+    TListInfractions ticket = binarySearch(infractionSystem->arrId,id,0,infractionSystem->dim-1);
     if(ticket != NULL){
-        ticket->firstTicket = addTicketRec(ticket->firstTicket,plate,&added);
-        ticket->totalFines += added;
+        if(arrPlates[letter] == NULL){
+            arrPlates[letter] = ticket->firstTicket;
+            arrPlateIsNull = 1;
+        }
+        ticket->firstTicket = addTicketIter(arrPlates[letter],plate,&added,&auxTicket);
+        ticket->totalFines++;
+        if(added == 1 && arrPlateIsNull == 0 && strcasecmp(auxTicket->plate,arrPlates[letter]->plate) > 0){
+            arrPlates[letter] = auxTicket;
+        }
     }
     return added;
 }
