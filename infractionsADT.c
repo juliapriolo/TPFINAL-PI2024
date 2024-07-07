@@ -9,6 +9,7 @@
 #define EMPTY "EMPTY"
 #define START 0
 #define CURRENT_YEAR 2024
+#define CHECK_MEMORY(ptr) if((ptr) == NULL || errno == ENOMEM) { return NULL;}
 
 enum Meses {Enero = 0,Febrero,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre};
 static char *monthNames[] = {"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
@@ -70,16 +71,11 @@ infractionSystemADT newInfractionSystem(size_t minYear, size_t maxYear){
     }
 
     infractionSystemADT newSystem = calloc(1,sizeof(infractionSystemCDT));    
-    if(newSystem == NULL){ 
-        return NULL; //o exit(1)
-    }
+    CHECK_MEMORY(newSystem);
    
     size_t newDim = maxYear - minYear + 1;
     newSystem->arrYears = malloc(newDim * sizeof(size_t *));
-    if(newSystem->arrYears == NULL){
-        free(newSystem);
-        return NULL; // o exit(1)
-    }
+    CHECK_MEMORY(newSystem->arrYears);
 
     for(size_t i = 0; i < newDim; i++){
         newSystem->arrYears[i] = calloc(MONTHS,sizeof(size_t));
@@ -111,9 +107,7 @@ static int cmpIds(const void *a, const void *b){
 static TId *fillArr(TId *array, size_t dim, TListInfractions pInfraction){
     array  = realloc(array,sizeof(*array) * dim);
     errno=0;
-    if(array==NULL || errno==ENOMEM){
-        return NULL;
-    }
+    CHECK_MEMORY(array);
     array[dim-1].pNode = pInfraction;
     array[dim-1].id = pInfraction->id;
     qsort(array, dim, sizeof(TId), cmpIds);
@@ -124,8 +118,10 @@ static TListInfractions addInfractionRec(TListInfractions list, char *descriptio
     int c;
     if(list == NULL || (c = strcasecmp(list->description, description)) > 0){
         TListInfractions newNode = malloc(sizeof(TInfractions));
+        CHECK_MEMORY(newNode);
         newNode->description = malloc(strlen(description) + 1);
-        //Verificar que los malloc hayan funcionado
+        CHECK_MEMORY(newNode->description);
+
         strcpy(newNode->description,description); //chequear esto
         newNode->firstTicket = NULL;
         newNode->tail = list;
@@ -157,7 +153,7 @@ int addInfraction(infractionSystemADT infractionSystem, char *description, size_
 static void addAgencyInfraction(TAgencyInfraction ** infVec, size_t  dim, size_t id){
     int i;
     int flag = 1;
-    for(i=0; i < dim && flag; i++){
+    for(i = 0; i < dim && flag; i++){
         if((*infVec)[i].id == 0){
             (*infVec)[i].fineCount = 1;
             (*infVec)[i].id = id;
@@ -178,16 +174,13 @@ static TListAgency addAgencyRec(TListAgency list, char * agName,size_t id,size_t
     if(list == NULL || (c = strcasecmp(list->agencyName, agName)) > 0){
         //si la agencia no estaba tampoco habia ninguna infraccion
         TListAgency newAgency = malloc(sizeof(TAgency));
-        if(newAgency == NULL || errno == ENOMEM){
-            return 0;
-        }
+        CHECK_MEMORY(newAgency);
         newAgency->agencyName = malloc(strlen(agName)+1);
+        CHECK_MEMORY(newAgency->agencyName);
 
-        if(newAgency->agencyName == NULL || errno == ENOMEM){
-            return 0;
-        }
         strcpy(newAgency->agencyName, agName);
         newAgency->infractions = calloc(dim,sizeof(TAgencyInfraction));
+        CHECK_MEMORY(newAgency->infractions);
         addAgencyInfraction(&(newAgency->infractions), dim, id);
         newAgency->tail = list;
         *added = 1;
@@ -241,14 +234,11 @@ static TListTickets addTicketRec(TListTickets listTick, char *plate, size_t *add
     if(listTick == NULL || (c = strcasecmp(plate, listTick->plate)) < 0 ){
         errno = 0;
         TListTickets aux = calloc(1, sizeof(TTickets)); // para iniciar el count en 0
-        if(aux == NULL || errno == ENOMEM){
-            return NULL;
-        }
+        CHECK_MEMORY(aux);
+
         aux->plate = malloc(((strlen(plate)) + 1));
-        if(aux->plate == NULL || errno == ENOMEM){
-            free(aux);
-            return NULL;
-        }
+        CHECK_MEMORY(aux->plate);
+
         strcpy(aux->plate, plate);
         aux->fineCount++;
         aux->tail = listTick;
@@ -383,9 +373,8 @@ void freeInfractionSystem(infractionSystemADT infractionSystem){
 static char *copyStr(char *s) {
     errno = 0;
     char *ans = malloc(strlen(s) + 1);
-    if (ans == NULL || errno == ENOMEM) {
-        return NULL;
-    }
+    CHECK_MEMORY(ans);
+
     strcpy(ans, s);
     return ans;
 }
@@ -429,15 +418,11 @@ static TListQ1 addRecQ1(TListQ1 list, char * infractionName, size_t total){
     int c;
     if(list == NULL || (c = list->totalInfracctions - total) < 0 || (c == 0 && strcmp(list->infraction, infractionName) > 0)){
         TListQ1 newNode = malloc(sizeof(TNodeQ1));
-        
-        if(newNode == NULL || errno == ENOMEM){                 //Chequeo de memoria
-            return NULL;
-        }
+        CHECK_MEMORY(newNode);
+
         newNode->infraction = malloc(strlen(infractionName)+1);
-        if(newNode->infraction == NULL){
-            free(newNode);
-            return NULL;
-        }
+        CHECK_MEMORY(newNode->infraction);
+
         strcpy(newNode->infraction, infractionName);
         newNode->totalInfracctions = total;
         newNode->tail = list;
@@ -460,9 +445,7 @@ TQuery1 * query1(infractionSystemADT infractionSystem){
     errno = 0;
 
     TQuery1 * ans = calloc(1, sizeof(TQuery1));
-    if(ans == NULL || errno == ENOMEM){
-        return NULL;
-    }
+    CHECK_MEMORY(ans);
 
     toBegin(infractionSystem);          //inicializa el iterador de lista de infracciones
 
@@ -486,12 +469,13 @@ void freeQ2(TQuery2 *query2){
     free(query2);
 }
 
-static vecQuery2 searchMostPopular(TAgencyInfraction *infractions, size_t dim, TId *arr){
+static vecQuery2 *searchMostPopular(TAgencyInfraction *infractions, size_t dim, TId *arr){
     int i = 0;
     int maxId = 0; //el id de la infraccion con mas multas
     int maxCount = 0; // cant mayor de multas
     TListInfractions maxIdNode = NULL; //puntero al nodo de la infraccion con mas multas
     TQuery2 *ans = malloc(sizeof(TQuery2));
+    CHECK_MEMORY(ans);
 
     while(i < dim){ // recorro el vector de ids (infracciones)
         if(maxCount < infractions[i].fineCount){
@@ -511,6 +495,7 @@ static vecQuery2 searchMostPopular(TAgencyInfraction *infractions, size_t dim, T
     }
     ans->dataVec[0].fineCount = maxCount;
     ans->dataVec[0].mostPopularInf = malloc(strlen(maxIdNode->description) + 1);
+    CHECK_MEMORY(ans->dataVec[0].mostPopularInf);
     strcpy(ans->dataVec[0].mostPopularInf, maxIdNode->description);
     return ans->dataVec[0];
 }
@@ -520,9 +505,7 @@ static vecQuery2 searchMostPopular(TAgencyInfraction *infractions, size_t dim, T
 TQuery2 *query2(infractionSystemADT system){ 
     errno = 0;
     TQuery2 *newQ2 = calloc(system->dimAgency, sizeof(TQuery2));
-    if(errno == ENOMEM || newQ2 == NULL){
-        return NULL;
-    }
+    CHECK_MEMORY(newQ2);
 
     toBeginByAgency(system);
     size_t i = 0;
@@ -543,23 +526,23 @@ TQuery2 *query2(infractionSystemADT system){
 //funciones iteracion y free Query2 (las vamos a necesitar para el main)
 
 void toBeginQ3(TQuery3* query3){
-    query3->iter=query3->first;
+    query3->iter = query3->first;
 }
 
 int hasNextQ3(TQuery3* query3){
-    return query3->iter!=NULL;
+    return query3->iter != NULL;
 }
 
 void *nextQ3(TQuery3* query3){
     if(!hasNextQ3(query3))
         return NULL;
-    TListQuery3 ans=query3->iter;
-    query3->iter=query3->iter->tail;
+    TListQuery3 ans = query3->iter;
+    query3->iter = query3->iter->tail;
     return ans;
 }
 
 static void freeQ3Rec(TListQuery3 listQ3){
-    if(listQ3==NULL)
+    if(listQ3 == NULL)
         return ;
     freeQ3Rec(listQ3->tail);
     free(listQ3);
@@ -574,23 +557,16 @@ static TListQuery3 addQuery3(TQuery3 * myQuery, size_t queryFineAmount, char ** 
     errno = 0;
 
     TListQuery3 aux = malloc(sizeof(ListQuery3)); // quiero agregar un nodo nuevo
-    if(aux == NULL || errno == ENOMEM){
-        return NULL;
-    }
+    CHECK_MEMORY(aux);
 
     aux->infraction = malloc((strlen(queryInfraction) + 1) * sizeof(char));
-    if(aux->infraction == NULL || errno == ENOMEM){
-        free(aux);
-        return NULL;
-    }
+    CHECK_MEMORY(aux->infraction);
+
     strcpy(aux->infraction, queryInfraction);
 
     aux->plate = malloc((strlen(*queryPlate) + 1) * sizeof(char));
-    if(aux->plate == NULL || errno == ENOMEM){
-        free(aux->infraction);
-        free(aux);
-        return NULL;
-    }
+    CHECK_MEMORY(aux->plate);
+
     strcpy(aux->plate, *queryPlate);
 
     aux->totalInfractions = queryTotalInfractions;
@@ -609,16 +585,12 @@ TQuery3 * query3(infractionSystemADT infractionSystem){
     errno = 0;
 
     TQuery3 * myQuery = calloc(1, sizeof(TQuery3));
-    if(errno == ENOMEM || myQuery == NULL){
-        return NULL;
-    }
+    CHECK_MEMORY(myQuery);
 
     size_t queryFinesAmount = 0; // inicializo una var temporal que la voy cambiando a medida que encuentre la patente con mas multas
     
     char ** queryPlate = malloc((strlen(infractionSystem->firstInfraction->firstTicket->plate) + 1) * sizeof(char *));
-    if(errno == ENOMEM || queryPlate == NULL){
-        return NULL;
-    }
+    CHECK_MEMORY(*queryPlate);
 
     char * queryInfraction = NULL;
     size_t queryTotalInfractions = 0;
@@ -628,10 +600,7 @@ TQuery3 * query3(infractionSystemADT infractionSystem){
     while(hasNext(infractionSystem)){
         int flag = 0; //para ver si tiene patentes, si no tiene voy a tener que frear queryInfraction;
         queryInfraction = realloc(queryInfraction, ((strlen(infractionSystem->iterInfractions->description)+1) * sizeof(char))); //sea cual sea la cantidad, va a ser de esta infraccion
-        if(queryInfraction == NULL || errno == ENOMEM){
-            free(myQuery);
-            return NULL;
-        }
+        CHECK_MEMORY(queryInfraction);
 
         TListTickets currentTicket = infractionSystem->iterInfractions->firstTicket;
         while(currentTicket != NULL){
@@ -671,13 +640,11 @@ TQuery4 *query4(infractionSystemCDT *infractionSystem) {
         dim = infractionSystem->maxYear - infractionSystem->minYear + 1;
     }
     TQuery4 *ans = calloc(1, sizeof(TQuery4));
-    if(ans==NULL || errno == ENOMEM){
-        return NULL;
-    }
+    CHECK_MEMORY(ans);
+
     ans->vec = calloc(dim,sizeof(*(ans->vec)));
-    if (ans->vec == NULL) {
-        return NULL;
-    }
+    iCHECK_MEMORY(ans->vec);
+    
     for (size_t i = 0; i < dim; i++) {
         char *m1 = NULL, *m2 = NULL, *m3 = NULL;
         int n1 = 0, n2 = 0, n3 = 0;
