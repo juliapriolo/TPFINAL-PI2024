@@ -188,17 +188,13 @@ int main(int argc, char *argv[]){
 
     TQuery3 * q3 = query3(infractionSystem);
 
-    toBeginQ3(q3);
-
     //Encabezado archivo csv:
     fprintf(filesCSV[THIRD], "infraction;plate;tickets\n");    
 
-    while ( hasNextQ3(q3)){
-        fprintf(filesCSV[THIRD], "%s;%s;%ld\n", q3->iter->infraction, q3->iter->plate, q3->iter->totalInfractions);
+    for(size_t i = 0; i < q3->dim; i++){
+        fprintf(filesCSV[THIRD], "%s;%s;%ld\n", q3->vectorDeDatos[i].infraction, q3->vectorDeDatos[i].plate, q3->vectorDeDatos[i].fineAmount);
         // Agregar fila HTML
-        addHTMLRow(filesHTML[THIRD], q3->iter->infraction, q3->iter->plate, q3->iter->totalInfractions);
-
-        nextQ3(q3);
+        addHTMLRow(filesHTML[THIRD], q3->vectorDeDatos[i].infraction, q3->vectorDeDatos[i].plate, q3->vectorDeDatos[i].fineAmount);
     }
     
     freeQ3(q3);

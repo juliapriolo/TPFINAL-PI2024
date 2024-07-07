@@ -74,19 +74,15 @@ typedef struct query2{
     size_t dim; // dimension del vector
 }TQuery2;
 
-typedef struct listQuery3{
+typedef struct vecQuery3{
     char * infraction; //nombre infraccion
     char * plate; //numero de patente
-    size_t totalInfractions; //cantidad de infracciones
-    struct listQuery3 * tail;
-}ListQuery3;
-
-typedef ListQuery3 * TListQuery3;
+    size_t fineAmount; //cantidad de multas
+}vecQuery3;
 
 typedef struct query3{
-    TListQuery3 first;
-    TListQuery3 iter;
-    TListQuery3 last;
+    vecQuery3 * vectorDeDatos;
+    size_t dim; // dimension del vector, lo voy a reallocar con bloques
 }TQuery3;
 
 typedef struct nodeq4{

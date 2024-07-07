@@ -10,6 +10,7 @@
 #define START 0
 #define CURRENT_YEAR 2024
 #define CHECK_MEMORY(ptr) if((ptr) == NULL || errno == ENOMEM) { return NULL;}
+#define BLOCK 100;
 
 enum Meses {Enero = 0,Febrero,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre};
 static char *monthNames[] = {"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
@@ -512,109 +513,85 @@ TQuery2 *query2(infractionSystemADT system){
     return newQ2;
 }
 
-//QUERY 3: Infraccion con la patente con mayor cantidad de multas
-//funciones iteracion y free Query2 (las vamos a necesitar para el main)
-
-void toBeginQ3(TQuery3* query3){
-    query3->iter = query3->first;
-}
-
-int hasNextQ3(TQuery3* query3){
-    return query3->iter != NULL;
-}
-
-void *nextQ3(TQuery3* query3){
-    if(!hasNextQ3(query3))
-        return NULL;
-    TListQuery3 ans = query3->iter;
-    query3->iter = query3->iter->tail;
-    return ans;
-}
-
-static void freeQ3Rec(TListQuery3 listQ3){
-    if(listQ3 == NULL)
-        return ;
-    freeQ3Rec(listQ3->tail);
-    free(listQ3);
-}
-
-void freeQ3(TQuery3* query3){
-    freeQ3Rec(query3->first);
+void freeQ3(TQuery3 * query3){
+    for(size_t i = 0; i < query3->dim; i++){
+        free(query3->vectorDeDatos[i].infraction);
+        free(query3->vectorDeDatos[i].plate);
+    }
+    free(query3->vectorDeDatos);
     free(query3);
 }
 
-static TListQuery3 addQuery3(TQuery3 * myQuery, size_t queryFineAmount, char ** queryPlate, char * queryInfraction, size_t queryTotalInfractions){
-    errno = 0;
-
-    TListQuery3 aux = malloc(sizeof(ListQuery3)); // quiero agregar un nodo nuevo
-    CHECK_MEMORY(aux);
-
-    aux->infraction = malloc((strlen(queryInfraction) + 1) * sizeof(char));
-    CHECK_MEMORY(aux->infraction);
-
-    strcpy(aux->infraction, queryInfraction);
-
-    aux->plate = malloc((strlen(*queryPlate) + 1) * sizeof(char));
-    CHECK_MEMORY(aux->plate);
-
-    strcpy(aux->plate, *queryPlate);
-
-    aux->totalInfractions = queryTotalInfractions;
-    aux->tail = NULL;
-
-    if(myQuery->first == NULL){
-        myQuery->first = aux;
-    } else{
-        myQuery->last->tail = aux;
+//QUERY 3: Infraccion con la patente con mayor cantidad de multas
+//funciones iteracion y free Query2 (las vamos a necesitar para el main)
+void addQuery3(TListTickets ticketList, size_t * maxFineAmount, char * *maxPlate){
+    while(ticketList != NULL){
+        if((*maxFineAmount) < ticketList->fineCount){
+            (*maxFineAmount) = ticketList->fineCount;
+            (*maxPlate) = ticketList->plate;
+        } else if(((*maxFineAmount) == ticketList->fineCount) && (strcasecmp(ticketList->plate, *maxPlate) < 0)){
+            (*maxPlate) = ticketList->plate;
+        }
+        ticketList = ticketList->tail;
     }
-    myQuery->last = aux;
-    return myQuery->first;
 }
 
-TQuery3 * query3(infractionSystemADT infractionSystem){
+TQuery3 * query3(infractionSystemADT system){
     errno = 0;
-
-    TQuery3 * myQuery = calloc(1, sizeof(TQuery3));
-    CHECK_MEMORY(myQuery);
-
-    size_t queryFinesAmount = 0; // inicializo una var temporal que la voy cambiando a medida que encuentre la patente con mas multas
+    TQuery3 * ans = calloc(1, sizeof(TQuery3));
+    CHECK_MEMORY(ans);
     
-    char ** queryPlate = malloc((strlen(infractionSystem->firstInfraction->firstTicket->plate) + 1) * sizeof(char *));
-    CHECK_MEMORY(*queryPlate);
+    size_t i = 0;
+    size_t qValidInfrAmmount = 0; //cada vez que una infraccion tenga patentes, es valida, lo incremento
+    char * qInfraction = NULL;
 
-    char * queryInfraction = NULL;
-    size_t queryTotalInfractions = 0;
+    toBegin(system);
+    while(hasNext(system)){ // recorro las infracciones
+        TListTickets currentTicket = system->iterInfractions->firstTicket;
+        if(currentTicket != NULL){ //si tiene al menos una infraccion, entra, tengo datos que almacenar
+            qValidInfrAmmount++;
 
-    toBegin(infractionSystem); // inicializo el iterador en el primer nodo de la lista de infracciones
-    
-    while(hasNext(infractionSystem)){
-        int flag = 0; //para ver si tiene patentes, si no tiene voy a tener que frear queryInfraction;
-        queryInfraction = realloc(queryInfraction, ((strlen(infractionSystem->iterInfractions->description)+1) * sizeof(char))); //sea cual sea la cantidad, va a ser de esta infraccion
-        CHECK_MEMORY(queryInfraction);
+            size_t qFineAmount = 0;
+            char * qPlate = NULL;    
 
-        TListTickets currentTicket = infractionSystem->iterInfractions->firstTicket;
-        while(currentTicket != NULL){
-            flag = 1; //como entro al while, tiene al menos una patente
-            if(currentTicket->fineCount > queryFinesAmount){
-                queryFinesAmount = currentTicket->fineCount;
-                *queryPlate = currentTicket->plate; // me guardo en el puntero la patente asi no lo copio siempre, sino que recien lo copio cuando encontre el max de multas
-            }else if(currentTicket->fineCount == queryFinesAmount){
-                if(strcasecmp(*queryPlate, currentTicket->plate) > 0){
-                    *queryPlate = currentTicket->plate; //si plate esta antes alfabeticamente, lo quiero
+            qInfraction = realloc(qInfraction, (strlen(system->iterInfractions->description) + 1) * sizeof(char));
+            CHECK_MEMORY(qInfraction);
+
+            strcpy(qInfraction, system->iterInfractions->description); // copio la descripcion de la infracion en qInfraction
+            addQuery3(currentTicket, &qFineAmount, &qPlate);
+
+            if(ans->vectorDeDatos == NULL || qValidInfrAmmount > ans->dim){
+                size_t newDim = BLOCK + ans->dim;
+
+                ans->vectorDeDatos = realloc(ans->vectorDeDatos, newDim * sizeof(vecQuery3));
+                CHECK_MEMORY(ans->vectorDeDatos);
+
+                for(size_t j = ans->dim; j < newDim; j++){
+                    ans->vectorDeDatos[j].fineAmount = 0;
+                    ans->vectorDeDatos[j].infraction = NULL;
+                    ans->vectorDeDatos[j].plate = NULL;
                 }
+                ans->dim = newDim;
             }
-            currentTicket = currentTicket->tail;
+
+            ans->vectorDeDatos[i].infraction = malloc(strlen(qInfraction) + 1);
+            CHECK_MEMORY(ans->vectorDeDatos[i].infraction);
+
+            ans->vectorDeDatos[i].plate = malloc((strlen(qPlate) + 1));
+            CHECK_MEMORY(ans->vectorDeDatos[i].plate);
+
+            ans->vectorDeDatos[i].fineAmount = qFineAmount;
+            strcpy(ans->vectorDeDatos[i].plate, qPlate);
+            strcpy(ans->vectorDeDatos[i].infraction, qInfraction);
+            i++;
         }
-        if(flag == 1){
-            strcpy(queryInfraction, infractionSystem->iterInfractions->description);
-            queryTotalInfractions++; // como agregue los datos de una infraccion, ya que tenia al menos una patente, sumo a la cantidad de infracciones
-            myQuery->first = addQuery3(myQuery, queryFinesAmount, queryPlate, queryInfraction, queryTotalInfractions);
-        }
-        next(infractionSystem);
+        next(system);
     }
-    free(queryPlate);
-    free(queryInfraction);
-    return myQuery;
+    ans->vectorDeDatos = realloc(ans->vectorDeDatos, qValidInfrAmmount * sizeof(vecQuery3));
+    CHECK_MEMORY(ans->vectorDeDatos);
+
+    ans->dim = qValidInfrAmmount;
+    return ans;
 }
 
 
@@ -634,7 +611,7 @@ TQuery4 *query4(infractionSystemCDT *infractionSystem) {
 
     ans->vec = calloc(dim,sizeof(*(ans->vec)));
     iCHECK_MEMORY(ans->vec);
-    
+
     for (size_t i = 0; i < dim; i++) {
         char *m1 = NULL, *m2 = NULL, *m3 = NULL;
         int n1 = 0, n2 = 0, n3 = 0;
