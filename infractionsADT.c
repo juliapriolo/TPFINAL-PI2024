@@ -702,3 +702,7 @@ TQuery4 *query4(infractionSystemCDT *infractionSystem) {
 
     return ans;
 }
+
+size_t dimAgency(infractionSystemADT system){
+    return system->dimAgency;
+}
