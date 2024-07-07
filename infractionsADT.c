@@ -172,44 +172,62 @@ static void addAgencyInfraction(TAgencyInfraction ** infVec, size_t  dim, size_t
 }
 
 
-static TListAgency addAgencyRec(TListAgency list, char * agName,size_t id,size_t dim,size_t *added){
+static TListAgency addAgencyIter(TListAgency list, char *agName, size_t id, size_t dim, size_t *added) {
+    TListAgency current = list;
+    TListAgency previous;
     int c;
-    errno = 0;
-    if(list == NULL || (c = strcasecmp(list->agencyName, agName)) > 0){
-        //si la agencia no estaba tampoco habia ninguna infraccion
-        TListAgency newAgency = malloc(sizeof(TAgency));
-        CHECK_MEMORY(newAgency);
-        newAgency->agencyName = malloc(strlen(agName)+1);
-        CHECK_MEMORY(newAgency->agencyName);
 
-        strcpy(newAgency->agencyName, agName);
-        newAgency->infractions = calloc(dim,sizeof(TAgencyInfraction));
-        CHECK_MEMORY(newAgency->infractions);
-        addAgencyInfraction(&(newAgency->infractions), dim, id);
-        newAgency->tail = list;
-        *added = 1;
-        return newAgency;
+    while (current != NULL && (c = strcasecmp(current->agencyName, agName)) < 0) {
+        previous = current;
+        current = current->tail;
     }
 
-    if(c==0){
+    if (current != NULL && c == 0) {
         *added = 2;
-        addAgencyInfraction(&(list->infractions), dim, id);
+        addAgencyInfraction(&(current->infractions), dim, id);
         return list;
     }
 
-    list->tail = addAgencyRec(list->tail, agName, id,dim,added);
-    return list;
+    errno = 0;
+    TListAgency newAgency = malloc(sizeof(TAgency));
+    if (newAgency == NULL || errno == ENOMEM) {
+        return NULL;
+    }
+    newAgency->agencyName = malloc(strlen(agName) + 1);
+    if (newAgency->agencyName == NULL || errno == ENOMEM) {
+        free(newAgency);
+        return NULL;
+    }
+    strcpy(newAgency->agencyName, agName);
+    newAgency->infractions = calloc(dim, sizeof(TAgencyInfraction));
+    if (newAgency->infractions == NULL || errno == ENOMEM) {
+        free(newAgency->agencyName);
+        free(newAgency);
+        return NULL;
+    }
+    addAgencyInfraction(&(newAgency->infractions), dim, id);
+    newAgency->tail = current;
 
+    if (current == list) {
+        list = newAgency;
+    } else {
+        previous->tail = newAgency;
+    }
+
+    *added = 1;
+    return list;
 }
 
 //0 si no agrego, 1 si agrego una nueva agencia, 2 si la agencia ya estaba
 int addAgency(infractionSystemADT infractionSystem, char * agency, size_t id){
     size_t added = 0;
-    TListInfractions aux = binarySearch(infractionSystem->arrId, id, 0, infractionSystem->dim-1);
-    if(aux==NULL){
-        return added;
+    TListInfractions ticket = binarySearch(infractionSystem->arrId,id,0,infractionSystem->dim-1);
+    if(ticket != NULL){
+        infractionSystem->firstAgency = addAgencyIter(infractionSystem->firstAgency, agency, id,infractionSystem->dim,&added);
+        if(added == 1){
+            infractionSystem->dimAgency++;
+        }
     }
-    infractionSystem->firstAgency = addAgencyRec(infractionSystem->firstAgency, agency, id,infractionSystem->dim,&added);
     return added;
 }
 
