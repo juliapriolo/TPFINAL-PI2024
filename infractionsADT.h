@@ -48,6 +48,10 @@ int hasNextByAgency(infractionSystemADT a);
 
 char *nextByAgency(infractionSystemADT a);
 
+size_t dimAgency(infractionSystemADT system);
+
+size_t dimArr(infractionSystemADT system);
+
 //funcion free infraction
 void freeInfractionSystem(infractionSystemADT infractionSystem);
 
@@ -65,15 +69,10 @@ typedef struct TQuery1{
     TListQ1 iter;
 }TQuery1;
 
-typedef struct query2Arr{
+typedef struct query2{
     char *agency;
     char *mostPopularInf;
     size_t fineCount;
-}TQuery2Arr;
-
-typedef struct query2{
-    TQuery2Arr * dataVec; // vector de tipo quer2, cada posicion tiene los datos que piden del query
-    size_t dim; // dimension del vector
 }TQuery2;
 
 typedef struct vecQuery3{
