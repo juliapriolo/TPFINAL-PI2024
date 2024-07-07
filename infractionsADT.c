@@ -323,7 +323,6 @@ static void freeTicketList(TListTickets list){
     free(list);
 }
 
-
 static void freeLInfractionsRec(TListInfractions list){
     if(list == NULL){
         return;
@@ -349,8 +348,6 @@ static void freeArrYears(size_t **arrYears, size_t minYear, size_t maxYear) {
     free(arrYears);
 }
 
-
-
 static void freeLAgencyRec(TListAgency list){
     if(list == NULL){
         return;
@@ -364,7 +361,7 @@ static void freeLAgencyRec(TListAgency list){
 void freeInfractionSystem(infractionSystemADT infractionSystem){
     freeLInfractionsRec(infractionSystem->firstInfraction);
     freeLAgencyRec(infractionSystem->firstAgency);
-    freeID(infractionSystem->arrId, infractionSystem->dim);
+    free(infractionSystem->arrId);
     freeArrYears(infractionSystem->arrYears, infractionSystem->minYear, infractionSystem->maxYear);//liberar arrYears
     free(infractionSystem);
 }
