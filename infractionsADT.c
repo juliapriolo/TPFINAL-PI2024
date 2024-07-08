@@ -30,8 +30,8 @@ typedef struct infractions{
     char *description;
     size_t id;
     size_t totalFines;// total de multas por infraccion
+    TListTickets arrPlates[PLATE_ARR_SIZE];
     struct infractions *tail;
-    TListTickets firstTicket;
 }TInfractions;
 
 typedef TInfractions *TListInfractions;
@@ -129,7 +129,9 @@ static TListInfractions addInfractionRec(TListInfractions list, char *descriptio
         CHECK_MEMORY(newNode->description);
 
         strcpy(newNode->description,description); //chequear esto
-        newNode->firstTicket = NULL;
+        for (int i = 0; i < PLATE_ARR_SIZE; i++) {
+            newNode->arrPlates[i] = NULL;
+        }
         newNode->tail = list;
         newNode->totalFines = 0;
         newNode->id = id;
@@ -258,17 +260,17 @@ int addAgency(infractionSystemADT infractionSystem, char * agency, size_t id){
     si la patente no se encuentra entonces la añade de forma alfabetica, sino, aumenta el contador de multas para dicha patente. En ambos casos retorna 1.
 */
 
-static TListTickets addTicketIter(TListTickets listTick, char *plate, size_t *added,TListTickets *auxTicket) {
+static TListTickets addTicketIter(TListTickets listTick, char *plate,size_t *added){
     TListTickets current = listTick;
     TListTickets previous;
     int c;
 
-    while (current != NULL && (c = strcasecmp(plate, current->plate)) > 0) {
+    while(current != NULL && (c = strcasecmp(plate, current->plate)) > 0){
         previous = current;
         current = current->tail;
     }
 
-    if (current != NULL && c == 0) {
+    if(current != NULL && c == 0){
         current->fineCount++;
         *added = 2;
         return listTick;
@@ -276,11 +278,11 @@ static TListTickets addTicketIter(TListTickets listTick, char *plate, size_t *ad
 
     errno = 0;
     TListTickets newTicket = calloc(1, sizeof(TTickets));
-    if (newTicket == NULL || errno == ENOMEM) {
+    if(newTicket == NULL || errno == ENOMEM){
         return NULL;
     }
     newTicket->plate = malloc((strlen(plate) + 1));
-    if (newTicket->plate == NULL || errno == ENOMEM) {
+    if(newTicket->plate == NULL || errno == ENOMEM){
         free(newTicket);
         return NULL;
     }
@@ -288,12 +290,10 @@ static TListTickets addTicketIter(TListTickets listTick, char *plate, size_t *ad
     newTicket->fineCount = 1;
     newTicket->tail = current;
 
-    if (current == listTick) {
+    if(current == listTick){
         listTick = newTicket;
-        *auxTicket = newTicket;
-    } else {
+    }else {
         previous->tail = newTicket;
-        *auxTicket = previous;
     }
     *added = 1;
     return listTick;
@@ -301,24 +301,15 @@ static TListTickets addTicketIter(TListTickets listTick, char *plate, size_t *ad
 
 int addTicket(infractionSystemADT infractionSystem, size_t id,char *plate){
     size_t added = 0;
-    int arrPlateIsNull = 0;
-    static TListTickets arrPlates[PLATE_ARR_SIZE];
     int letter = plate[0]-1;
-    TListTickets auxTicket;
     TListInfractions ticket = binarySearch(infractionSystem->arrId,id,0,infractionSystem->dim-1);
     if(ticket != NULL){
-        if(arrPlates[letter] == NULL){
-            arrPlates[letter] = ticket->firstTicket;
-            arrPlateIsNull = 1;
-        }
-        ticket->firstTicket = addTicketIter(arrPlates[letter],plate,&added,&auxTicket);
+        ticket->arrPlates[letter] = addTicketIter(ticket->arrPlates[letter],plate,&added);
         ticket->totalFines++;
-        if(added == 1 && arrPlateIsNull == 0 && strcasecmp(auxTicket->plate,arrPlates[letter]->plate) > 0){
-            arrPlates[letter] = auxTicket;
-        }
     }
     return added;
 }
+
 
 int addDate(infractionSystemADT system,int year,int month){
     if(year < system->minYear || year > system->maxYear || month < Enero || month > Diciembre){ //no se si puedo hacer esto xq month no es tipo enum Meses
