@@ -31,6 +31,7 @@ typedef struct infractions{
     size_t id;
     size_t totalFines;// total de multas por infraccion
     TListTickets arrPlates[PLATE_ARR_SIZE];
+    size_t exists;
     struct infractions *tail;
 }TInfractions;
 
@@ -132,6 +133,7 @@ static TListInfractions addInfractionRec(TListInfractions list, char *descriptio
         for (int i = 0; i < PLATE_ARR_SIZE; i++) {
             newNode->arrPlates[i] = NULL;
         }
+        newNode->exists = 0;
         newNode->tail = list;
         newNode->totalFines = 0;
         newNode->id = id;
@@ -582,7 +584,6 @@ TQuery2 *query2(infractionSystemADT system){
     return newQ2;
 }
 
-
 void freeQ3(TQuery3 * query3){
     for(size_t i = 0; i < query3->dim; i++){
         free(query3->vectorDeDatos[i].infraction);
@@ -594,15 +595,18 @@ void freeQ3(TQuery3 * query3){
 
 //QUERY 3: Infraccion con la patente con mayor cantidad de multas
 //funciones iteracion y free Query2 (las vamos a necesitar para el main)
-static void addQuery3(TListTickets ticketList, size_t * maxFineAmount, char * *maxPlate){
-    while(ticketList != NULL){
-        if((*maxFineAmount) < ticketList->fineCount){
-            (*maxFineAmount) = ticketList->fineCount;
-            (*maxPlate) = ticketList->plate;
-        } else if(((*maxFineAmount) == ticketList->fineCount) && (strcasecmp(ticketList->plate, *maxPlate) < 0)){
-            (*maxPlate) = ticketList->plate;
+static void addQuery3(TListTickets ticketList[PLATE_ARR_SIZE], size_t * maxFineAmount, char * *maxPlate){
+    for(size_t i = 0; i < PLATE_ARR_SIZE; i++){
+        TListTickets currentTicket = ticketList[i];
+        while(currentTicket != NULL){
+            if((*maxFineAmount) < currentTicket->fineCount){
+                (*maxFineAmount) = currentTicket->fineCount;
+                (*maxPlate) = currentTicket->plate;
+            } else if(((*maxFineAmount) == currentTicket->fineCount) && (strcasecmp(currentTicket->plate, *maxPlate) < 0)){
+                (*maxPlate) = currentTicket->plate;
+            }
+            currentTicket = currentTicket->tail;
         }
-        ticketList = ticketList->tail;
     }
 }
 
@@ -611,31 +615,25 @@ TQuery3 * query3(infractionSystemADT system){
     TQuery3 * ans = calloc(1, sizeof(TQuery3));
     CHECK_MEMORY(ans);
     
-    size_t i = 0;
+    size_t k = 0;
     size_t qValidInfrAmmount = 0; //cada vez que una infraccion tenga patentes, es valida, lo incremento
-    char * qInfraction = NULL;
 
     toBegin(system);
     while(hasNext(system)){ // recorro las infracciones
-        TListTickets currentTicket = system->iterInfractions->firstTicket;
-        if(currentTicket != NULL){ //si tiene al menos una infraccion, entra, tengo datos que almacenar
+        if(system->iterInfractions->exists){
             qValidInfrAmmount++;
 
             size_t qFineAmount = 0;
-            char * qPlate = NULL;    
+            char *qPlate = NULL;
 
-            qInfraction = realloc(qInfraction, (strlen(system->iterInfractions->description) + 1) * sizeof(char));
-            CHECK_MEMORY(qInfraction);
-
-            strcpy(qInfraction, system->iterInfractions->description); // copio la descripcion de la infracion en qInfraction
-            addQuery3(currentTicket, &qFineAmount, &qPlate);
+            addQuery3(system->iterInfractions->arrPlates, &qFineAmount, &qPlate);
 
             if(ans->vectorDeDatos == NULL || qValidInfrAmmount > ans->dim){
                 size_t newDim = (BLOCK + ans->dim);
 
                 ans->vectorDeDatos = realloc(ans->vectorDeDatos, newDim * sizeof(vecQuery3));
                 CHECK_MEMORY(ans->vectorDeDatos);
-
+                
                 for(size_t j = ans->dim; j < newDim; j++){
                     ans->vectorDeDatos[j].fineAmount = 0;
                     ans->vectorDeDatos[j].infraction = NULL;
@@ -644,16 +642,17 @@ TQuery3 * query3(infractionSystemADT system){
                 ans->dim = newDim;
             }
 
-            ans->vectorDeDatos[i].infraction = malloc(strlen(qInfraction) + 1);
-            CHECK_MEMORY(ans->vectorDeDatos[i].infraction);
+            ans->vectorDeDatos[k].infraction = malloc(strlen(system->iterInfractions->description) + 1);
+            CHECK_MEMORY(ans->vectorDeDatos[k].infraction);
 
-            ans->vectorDeDatos[i].plate = malloc((strlen(qPlate) + 1));
-            CHECK_MEMORY(ans->vectorDeDatos[i].plate);
+            ans->vectorDeDatos[k].plate = malloc((strlen(qPlate) + 1));
+            CHECK_MEMORY(ans->vectorDeDatos[k].plate);
 
-            ans->vectorDeDatos[i].fineAmount = qFineAmount;
-            strcpy(ans->vectorDeDatos[i].plate, qPlate);
-            strcpy(ans->vectorDeDatos[i].infraction, qInfraction);
-            i++;
+            ans->vectorDeDatos[k].fineAmount = qFineAmount;
+            strcpy(ans->vectorDeDatos[k].plate, qPlate);
+            strcpy(ans->vectorDeDatos[k].infraction, system->iterInfractions->description);
+            k++;
+           
         }
         next(system);
     }
@@ -663,7 +662,6 @@ TQuery3 * query3(infractionSystemADT system){
     ans->dim = qValidInfrAmmount;
     return ans;
 }
-
 
 // Función para el query4
 TQuery4 *query4(infractionSystemCDT *infractionSystem) {
