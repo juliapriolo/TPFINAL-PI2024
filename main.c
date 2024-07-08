@@ -182,7 +182,7 @@ int main(int argc, char *argv[]){
         // Agrega fila HTML
         addHTMLRow(filesHTML[SECOND], agencyq2, infractionq2, ticketsq2);
     }
-    freeQ2(q2);
+    freeQ2(q2, dim);
 
     // Carga de Query 3 
     char infractionq3[MAX_LINE];
