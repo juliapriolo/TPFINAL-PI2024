@@ -120,7 +120,7 @@ void freeQ1(TQuery1 * query1);
 void toBeginQ2(TQuery2* query2);
 int hasNextQ2(TQuery2* query2);
 void *nextQ2(TQuery2* query2);
-void freeQ2(TQuery2* query2);
+void freeQ2(TQuery2* query2, size_t dim);
 
 //funciones iteracion y free Query3 (las vamos a necesitar para el main)
 void toBeginQ3(TQuery3* query3);

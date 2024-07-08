@@ -521,7 +521,7 @@ TQuery1 * query1(infractionSystemADT infractionSystem){
 
 //QUERY 2 Infraccion mas popular por agencia emisora.
 
-void freeQ2(TQuery2 *query2,size_t dim){
+void freeQ2(TQuery2 *query2, size_t dim){
     for(int i=0;i<dim;i++){
         if(query2->agency != NULL){
             free(query2[i].agency);
@@ -533,7 +533,7 @@ void freeQ2(TQuery2 *query2,size_t dim){
     free(query2);
 }
 
-static void searchMostPopular(TAgencyInfraction *infractions,size_t dim,TId *arr,char **mostPopular,int *fineCount){
+static void searchMostPopular(TAgencyInfraction *infractions, size_t dim, TId *arr, char **mostPopular, int *fineCount){
     int i=0;
     int maxId=0;
     int maxCount=0;
@@ -572,7 +572,7 @@ TQuery2 *query2(infractionSystemADT system){
         if(aux->infractions != NULL){
             char *mostPopular = NULL;
             int fineCount = 0;
-            searchMostPopular(aux->infractions, system->dim, system->arrId,&mostPopular,&fineCount);
+            searchMostPopular(aux->infractions, system->dim, system->arrId, &mostPopular, &fineCount);
             newQ2[i].fineCount = fineCount;
             newQ2[i].mostPopularInf = mostPopular;
             newQ2[i].agency = malloc(strlen(aux->agencyName) + 1);
