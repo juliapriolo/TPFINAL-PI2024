@@ -29,7 +29,7 @@
 
 enum files{FIRST = 0, SECOND, THIRD, FOURTH};    //Enum para buscar los archivos filescsv y fileshtml
 
-enum programArguments{PROGRAM = 0,TICKETS,INFRACTIONS, MIN_YEAR, MAX_YEAR};  
+enum programArguments{PROGRAM = 0,TICKETS,INFRACTIONS, MIN_YEAR, MAX_YEAR};  //enum para el orden de los argumentos por linea de comando
 
 #ifdef NY
 #define MAX_LEN_AGENCY 35 //largo maximo para una agencia en Nueva York
@@ -43,8 +43,8 @@ enum arguments{PLATE=0, DATE, ID, FINE_AMOUNT, AGENCY}; //NY
 enum arguments{DATE=0, PLATE, AGENCY, ID, FINE_AMOUNT}; //CHI
 #endif
 
-int readInfraction(FILE *file, int idColumn, int infractionColumn, infractionSystemADT infractionSystem);
-int readTickets(FILE *file, int plateColumn, int dateColumn, int idColumn, int agencyColumn, infractionSystemADT system);
+int readInfraction(FILE *file, int idColumn, int infractionColumn, infractionSystemADT infractionSystem);   //lee el archivo de infracciones
+int readTickets(FILE *file, int plateColumn, int dateColumn, int idColumn, int agencyColumn, infractionSystemADT system);   //lee el archivo de tickets
 FILE *newCSV(const char *fileName, char *header);   //funcion que crea un nuevo archivo csv y verifica que se haya creado bien
 void closeCSV(FILE *files[], int fileQuantity); //funcion que cierra los archivos csv
 void closeHTML(htmlTable files[], int fileQuantity);    //funcion que cierra los archivos html que estan en el arreglo files
@@ -55,7 +55,7 @@ void closeWFile(infractionSystemADT infractionSystem, FILE *csvFile[], htmlTable
 
 int main(int argc, char *argv[]){
 
-    if(argc > MAX_ARG || argc<MIN_ARG){
+    if(argc > MAX_ARG || argc<MIN_ARG){ //si la cantidad de argumentos por linea de comando es errónea, aborta
         fprintf(stderr, "Incorrect amount of arguments supplied\n");
         exit(ERROR_PAR);
     }
@@ -64,7 +64,7 @@ int main(int argc, char *argv[]){
     if ( argc >= MIN_ARG ){ //Vemos si minYear es un tipo de dato valido
         if( !valid( argv[MIN_YEAR])){
             fprintf( stderr, "Incorrect type for the minimum year\n");
-            exit(ERROR_PAR); //vamos a hacer los enums para los distintos tipos de errores??
+            exit(ERROR_PAR); 
             }
         minYear = atoi(argv[MIN_YEAR]);
     }
@@ -82,19 +82,19 @@ int main(int argc, char *argv[]){
     }
 
     //Inicializacion de archivos de lectura
-    FILE * infractions = fopen(argv[INFRACTIONS], "r");              // archivo de infractions. Definir INFRACTIONS y TICKETS
-    FILE * tickets = fopen( argv[TICKETS], "r");                      // archivo de tickets
+    FILE * infractions = fopen(argv[INFRACTIONS], "r");
+    FILE * tickets = fopen( argv[TICKETS], "r");
     FILE * data_files[] = {tickets,infractions};
 
     //Chequeo de open files exitoso
     if (data_files[INFRACTIONS - 1] == NULL || data_files[TICKETS - 1] == NULL) {
         fprintf(stderr, "Error opening files\n");           
         closeCSV(data_files, FILES);                                
-        exit(ERROR_FILE);                                            //No se bien si hay que poner ese error
+        exit(ERROR_FILE); 
     }
 
     errno = 0;
-    infractionSystemADT infractionSystem = newInfractionSystem(minYear, maxYear);
+    infractionSystemADT infractionSystem = newInfractionSystem(minYear, maxYear); //inicializo el TAD
 
     //Chequeo inicializacion del TAD exitosa
     if(infractionSystem == NULL || errno == ENOMEM){
@@ -104,13 +104,13 @@ int main(int argc, char *argv[]){
         exit(ENOMEM);
     }
 
-    int infractionSuccess=readInfraction(data_files[INFRACTIONS-1], ID_INFR, DESCR, infractionSystem); //readInfraction returns 1 if it was successfull
+    int infractionSuccess=readInfraction(data_files[INFRACTIONS-1], ID_INFR, DESCR, infractionSystem); //readInfraction retorna 1 si fue exitoso
     if(!infractionSuccess){
-        fprintf(stderr, "Could not read infractions\n");
+        fprintf(stderr, "Could not read infractions\n"); 
         closeRFile(infractionSystem, data_files, ERROR_FILE, FILES);
     }
 
-    int ticketSuccess = readTickets(data_files[TICKETS-1], PLATE, DATE, ID, AGENCY, infractionSystem);  //readTickets returns 1 if it was successfull
+    int ticketSuccess = readTickets(data_files[TICKETS-1], PLATE, DATE, ID, AGENCY, infractionSystem);  //readTickets retorna 1 si fue exitoso
     if(!ticketSuccess){
         fprintf(stderr, "Could not read tickets\n");
         closeRFile(infractionSystem, data_files, ERROR_FILE, FILES);
@@ -150,11 +150,11 @@ int main(int argc, char *argv[]){
  
 
     while ( hasNextQ1(q1)){
-        fprintf(filesCSV[FIRST], "%s;%ld\n" , q1->iter->infraction, q1->iter->totalInfracctions);     
-        //No se bien que argumento iria en filesCSV
+        fprintf(filesCSV[FIRST], "%s;%ld\n" , q1->iter->infraction, q1->iter->totalInfracctions);  
+        //Preparar para HTML
         sprintf (infractionq1, "%s", q1->iter->infraction);
         sprintf (totalq1, "%ld", q1->iter->totalInfracctions);
-        //Agrego una nueva fila al archivo
+        //Agreg fila HTML
         addHTMLRow(filesHTML[FIRST], infractionq1, totalq1);     
 
         nextQ1(q1);
@@ -179,7 +179,7 @@ int main(int argc, char *argv[]){
         sprintf(infractionq2, "%s", q2[i].mostPopularInf);
         sprintf(ticketsq2, "%ld", q2[i].fineCount);
 
-        // Agregar fila HTML
+        // Agrega fila HTML
         addHTMLRow(filesHTML[SECOND], agencyq2, infractionq2, ticketsq2);
     }
     freeQ2(q2);
@@ -197,10 +197,11 @@ int main(int argc, char *argv[]){
 
     for(size_t i = 0; i < q3->dim; i++){
         fprintf(filesCSV[THIRD], "%s;%s;%ld\n", q3->vectorDeDatos[i].infraction, q3->vectorDeDatos[i].plate, q3->vectorDeDatos[i].fineAmount);
+        //Preparar para HTML
         sprintf(infractionq3, "%s", q3->vectorDeDatos[i].infraction);
         sprintf(plateq3, "%s", q3->vectorDeDatos[i].plate);
         sprintf(totalq3, "%ld", q3->vectorDeDatos[i].fineAmount);
-
+        //Agrega fila HTML
         addHTMLRow(filesHTML[THIRD], infractionq3, plateq3, totalq3);
     }
     
@@ -217,16 +218,17 @@ int main(int argc, char *argv[]){
 
     for(size_t i = 0; i < q4Dim; i++){
         fprintf(filesCSV[FOURTH], "%ld;%s;%s;%s\n", q4->vec[i].year, q4->vec[i].monthTop1, q4->vec[i].monthTop2, q4->vec[i].monthTop3);
-
+        //Preparar para HTML
         sprintf(year, "%ld", q4->vec[i].year);
         sprintf(topMonth1, "%s", q4->vec[i].monthTop1);
         sprintf(topMonth2, "%s", q4->vec[i].monthTop2);
         sprintf(topMonth3, "%s", q4->vec[i].monthTop3);
-
+        //Agrega fila HTML
         addHTMLRow(filesHTML[FOURTH], year, topMonth1, topMonth2, topMonth3);
     }
     freeQ4(q4);
 
+    //cierra los archivos de escritura
     closeWFile(infractionSystem, filesCSV, filesHTML, OK, CANT_QUERY);
     return OK;
 
@@ -300,7 +302,7 @@ int readTickets(FILE *file, int plateColumn, int dateColumn, int idColumn, int a
                 }
                 agency = token;
             }else if(columnIdx == dateColumn){
-                sscanf(token, "%d-%d", &year, &month);//PROBAR QUE FUNCIONES  
+                sscanf(token, "%d-%d", &year, &month);  
             }
             token = strtok(NULL,DELIMITER);
             columnIdx++;
