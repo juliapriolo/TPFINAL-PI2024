@@ -723,7 +723,11 @@ TQuery4 *query4(infractionSystemCDT *infractionSystem) {
     return ans;
 }
 
+
 void freeQ4(TQuery4* query4){
+    if(query4 == NULL){
+        return;
+    }
     for(size_t i = 0; i < query4->dim; i++){
         free(query4->vec[i].monthTop1);
         free(query4->vec[i].monthTop2);
