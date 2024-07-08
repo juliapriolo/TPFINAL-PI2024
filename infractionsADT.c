@@ -358,52 +358,74 @@ char *nextByAgency(infractionSystemADT a){
 
 //Funciones free
 
-static void freeTicketList(TListTickets list){
-    if(list == NULL){
-        return;
+static void freeArrYears(size_t **arrYears, size_t dim){
+    for(int i = 0; i < dim; i++){
+        if(arrYears[i] != NULL){
+            free(arrYears[i]);
+        }
     }
-    freeTicketList(list->tail);
-    free(list->plate);
-    free(list);
-}
-
-static void freeLInfractionsRec(TListInfractions list){
-    if(list == NULL){
-        return;
-    }
-    freeLInfractionsRec(list->tail);
-    freeTicketList(list->firstTicket);
-    free(list->description);
-    free(list);
-}
-
-static void freeArrYears(size_t **arrYears, size_t minYear, size_t maxYear) {   
-    for (size_t i = minYear; i < maxYear; i++) {
-        free(arrYears[i-minYear]);
-    }
-    
     free(arrYears);
+    return;
 }
 
-static void freeLAgencyRec(TListAgency list){
-    if(list == NULL){
-        return;
+static void freeTicketList(TListTickets list){
+    TListTickets current = list;
+    TListTickets next;
+    while(current != NULL){
+        next = current->tail;
+        if(current->plate != NULL){
+            free(current->plate);
+        }
+        free(current);
+        current = next;
     }
-    freeLAgencyRec(list->tail);
-    free(list->infractions);
-    free(list->agencyName);
-    free(list);
+    return;
+}
+
+static void freeInfractionList(TListInfractions list){
+    TListInfractions current = list;
+    TListInfractions next;
+
+    while(current != NULL){
+        next = current->tail;
+        if(current->description != NULL){
+            free(current->description);
+        }
+        for(int i = 0; i < PLATE_ARR_SIZE; i++){
+            if(current->arrPlates[i] != NULL){
+                freeTicketList(current->arrPlates[i]);
+            }
+        }
+        free(current);
+        current = next;
+    }
+    return;
+}
+
+void freeAgencyList(TListAgency list){
+    TListAgency current = list;
+    TListAgency next;
+    while(current != NULL){
+        next = current->tail;
+        if(current->agencyName != NULL){
+            free(current->agencyName);
+        }
+        if(current->infractions != NULL){
+            free(current->infractions);
+        }
+        free(current);
+        current = next;
+    }
+    return;    
 }
 
 void freeInfractionSystem(infractionSystemADT infractionSystem){
-    if(infractionSystem == NULL){
-        return;
-    }
-    freeLInfractionsRec(infractionSystem->firstInfraction);
-    freeLAgencyRec(infractionSystem->firstAgency);
     free(infractionSystem->arrId);
-    freeArrYears(infractionSystem->arrYears, infractionSystem->minYear, infractionSystem->maxYear);//liberar arrYears
+    freeArrYears(infractionSystem->arrYears, dimArr(infractionSystem));
+    freeInfractionList(infractionSystem->firstInfraction);
+    freeAgencyList(infractionSystem->firstAgency);
     free(infractionSystem);
+    return;
 }
 
 //Funcion para copiar
