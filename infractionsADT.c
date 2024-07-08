@@ -133,7 +133,7 @@ static TListInfractions addInfractionRec(TListInfractions list, char *descriptio
         for (int i = 0; i < PLATE_ARR_SIZE; i++) {
             newNode->arrPlates[i] = NULL;
         }
-        newNode->exists = 0;
+        newNode->exists = 1;
         newNode->tail = list;
         newNode->totalFines = 0;
         newNode->id = id;
