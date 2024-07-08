@@ -180,14 +180,14 @@ int main(int argc, char *argv[]){
         sprintf(ticketsq2, "%ld", q2[i].fineCount);
 
         // Agregar fila HTML
-        addHTMLRow(filesHTML[FIRST], agencyq2, infractionq2, ticketsq2);
+        addHTMLRow(filesHTML[SECOND], agencyq2, infractionq2, ticketsq2);
     }
     freeQ2(q2);
 
-    // Carga de Query 3 //NO USA ESTOS CHAR
-    //char infractionq3[MAX_LINE];
-    //char plateq3[MAX_LINE];
-    //char totalq3[MAX_LINE];
+    // Carga de Query 3 
+    char infractionq3[MAX_LINE];
+    char plateq3[MAX_LINE];
+    char totalq3[MAX_LINE];
     // puts("Empezando Query3");
 
     TQuery3 * q3 = query3(infractionSystem);
@@ -197,8 +197,11 @@ int main(int argc, char *argv[]){
 
     for(size_t i = 0; i < q3->dim; i++){
         fprintf(filesCSV[THIRD], "%s;%s;%ld\n", q3->vectorDeDatos[i].infraction, q3->vectorDeDatos[i].plate, q3->vectorDeDatos[i].fineAmount);
-        // Agregar fila HTML
-        addHTMLRow(filesHTML[THIRD], q3->vectorDeDatos[i].infraction, q3->vectorDeDatos[i].plate, q3->vectorDeDatos[i].fineAmount);
+        sprintf(infractionq3, "%s", q3->vectorDeDatos[i].infraction);
+        sprintf(plateq3, "%s", q3->vectorDeDatos[i].plate);
+        sprintf(totalq3, "%ld", q3->vectorDeDatos[i].fineAmount);
+
+        addHTMLRow(filesHTML[THIRD], infractionq3, plateq3, totalq3);
     }
     
     freeQ3(q3);
