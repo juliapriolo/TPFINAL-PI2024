@@ -519,7 +519,15 @@ TQuery1 * query1(infractionSystemADT infractionSystem){
 
 //QUERY 2 Infraccion mas popular por agencia emisora.
 
-void freeQ2(TQuery2 *query2){
+void freeQ2(TQuery2 *query2,size_t dim){
+    for(int i=0;i<dim;i++){
+        if(query2->agency != NULL){
+            free(query2[i].agency);
+        }
+        if(query2->mostPopularInf != NULL){
+            free(query2[i].mostPopularInf);
+        }
+    }
     free(query2);
 }
 
