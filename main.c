@@ -138,7 +138,7 @@ int main(int argc, char *argv[]){
             closeWFile(infractionSystem, filesCSV, filesHTML, ERROR_FILE, CANT_QUERY);
         }
     }
-
+    puts("Empezando query 1");
     // Carga de Query 1 
     char infractionq1[MAX_LINE];
     char totalq1[MAX_LINE];
@@ -160,8 +160,8 @@ int main(int argc, char *argv[]){
         nextQ1(q1);
     }
     freeQ1(q1);
-    fclose(filesCSV[FIRST]);
     
+    puts("Empezando query 2");
     //Carga de Query 2
     int dim = dimAgency(infractionSystem);
     TQuery2 * q2 = query2(infractionSystem);
@@ -184,6 +184,7 @@ int main(int argc, char *argv[]){
     }
     freeQ2(q2, dim);
 
+    puts("Empezando query 3");
     // Carga de Query 3 
     char infractionq3[MAX_LINE];
     char plateq3[MAX_LINE];
@@ -191,9 +192,6 @@ int main(int argc, char *argv[]){
     // puts("Empezando Query3");
 
     TQuery3 * q3 = query3(infractionSystem);
-
-    //Encabezado archivo csv:
-    fprintf(filesCSV[THIRD], "infraction;plate;tickets\n");    
 
     for(size_t i = 0; i < q3->dim; i++){
         fprintf(filesCSV[THIRD], "%s;%s;%ld\n", q3->vectorDeDatos[i].infraction, q3->vectorDeDatos[i].plate, q3->vectorDeDatos[i].fineAmount);
@@ -207,6 +205,7 @@ int main(int argc, char *argv[]){
     
     freeQ3(q3);
 
+    puts("Empezando query 4");
     //Carga el Query 4
     TQuery4 * q4 = query4(infractionSystem);
     int q4Dim = dimArr(infractionSystem);
@@ -326,7 +325,7 @@ int readTickets(FILE *file, int plateColumn, int dateColumn, int idColumn, int a
         }
         
     }
-    return (succesAgency && succesPlate && succesDate);
+    return (succesAgency && succesPlate);
 }
 
         
