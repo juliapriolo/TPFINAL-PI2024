@@ -303,11 +303,6 @@ int readTickets(FILE *file, int plateColumn, int dateColumn, int idColumn, int a
             columnIdx++;
         }
         if(agency != NULL){
-            static int total = 0;
-            total++;
-            if((total % 100000) == 0){
-                printf("Procesando:%d\n",total);
-            }
             succesAgency = addAgency(system,agency,id);
             if(!succesAgency){
                 fprintf(stderr, "Error adding agency: %s\n", agency);

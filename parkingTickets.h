@@ -1,8 +1,8 @@
 //longitudes de los strings str+1
-#ifdef NY
+#ifdef NYC
 #define MAX_LEN_AGENCY 36 //largo maximo para una agencia en Nueva York
 #define MAX_LEN_DESCR 31 //largo maximo para el nombre de una infracción en Nueva York
-enum arguments{PLATE=0, DATE, ID, FINE_AMOUNT, AGENCY}; //NY
+enum arguments{PLATE=0, DATE, ID, FINE_AMOUNT, AGENCY}; //NYC
 #else
 #define MAX_LEN_AGENCY 14 //largo maximo para una agencia en Chicago
 #define MAX_LEN_DESCR 51 //largo maximo para el nombre de una infraccion en Chicago
