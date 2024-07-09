@@ -19,13 +19,13 @@ Sofía Inés Ratto (sratto0)
 ## Creación de ejecutable:
 
     - Correr el comando "make all" para la creacion de dos archivos ejecutables "parkingTicketsNY" y "parkingTicketsCHI"
-    - Para la creacion unicamente del archivo "parkingTicketsNY" correr el comando "make NY"
+    - Para la creacion unicamente del archivo "parkingTicketsNYC" correr el comando "make NY"
     - Para la creacion unicamente del archivo "parkingTicketsCHI" correr el comando "make CHI"
 
 
 ## Ejecución del programa
 
-    - Correr el comando ./parkingTicketsNY ticketsNYC.csv infractionsNYC.csv año_minimo (opcional) año_maximo(opcional) para ejecutar "parkingTicketsNY"
+    - Correr el comando ./parkingTicketsNYC ticketsNYC.csv infractionsNYC.csv año_minimo (opcional) año_maximo(opcional) para ejecutar "parkingTicketsNY"
     - Correr el comando ./parkingTicketsCHI ticketsCHI.csv infractionsCHI.csv año_minimo (opcional) año_maximo(opcional) para ejecutar "parkingTicketsCHI"
 
 ## Eliminacion de archivos
