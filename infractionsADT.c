@@ -680,6 +680,8 @@ TQuery4 *query4(infractionSystemCDT *infractionSystem) {
     ans->vec = calloc(dim,sizeof(*(ans->vec)));
     CHECK_MEMORY(ans->vec);
 
+    ans->dim = dim;
+
     for (size_t i = 0; i < dim; i++) {
         char *m1 = NULL, *m2 = NULL, *m3 = NULL;
         int n1 = 0, n2 = 0, n3 = 0;
