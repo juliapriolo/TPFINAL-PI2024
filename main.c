@@ -44,7 +44,7 @@ void printQuery3(TQuery3 *q3);
 
 int main(int argc, char *argv[]){
 
-    if( argc < MIN_ARG || argc > MAX_ARG){ //si la cantidad de argumentos por linea de comando es errónea, aborta
+    if(argc < MIN_ARG || argc > MAX_ARG){ //si la cantidad de argumentos por linea de comando es errónea, aborta
         fprintf(stderr, "Incorrect amount of arguments supplied\n");
         exit(ERROR_PAR);
     }
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]){
 
     if (argc > MIN_ARG ){ //Vemos si minYear es un tipo de dato valido
         if( !valid( argv[MIN_YEAR])){
-            fprintf( stderr, "Incorrect type for the minimum year\n");
+            fprintf(stderr, "Incorrect type for the minimum year\n");
             exit(ERROR_PAR); 
             }
         if(atoi(argv[MIN_YEAR])){
