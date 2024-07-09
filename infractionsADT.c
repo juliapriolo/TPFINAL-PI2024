@@ -68,9 +68,7 @@ typedef struct infractionSystemCDT{
     size_t dim; //dimension total del arrId
 }infractionSystemCDT;
 
-static int cmpIds(const TId *a, const TId *b);
-static TId *fillArr(TId *array, size_t dim, TListInfractions *pInfraction);
-static TListInfractions binarySearch(TId *arr, size_t id, size_t left, size_t right);
+static TId *fillArr(TId *array,size_t id,size_t *dim, TListInfractions *pInfraction);
 static char *copyStr(const char* str);
 static TListInfractions addInfractionRec(TListInfractions list, char *description, size_t id, TListInfractions *pInfractions, size_t *added);
 static TListAgency addAgencyIter(TListAgency list, char *agName, size_t id, size_t dim, size_t *added);
@@ -98,6 +96,7 @@ infractionSystemADT newInfractionSystem(size_t minYear, size_t maxYear){
     newSystem->arrYears = malloc(newDim * sizeof(size_t *));
     CHECK_MEMORY(newSystem->arrYears);
 
+
     for(size_t i = 0; i < newDim; i++){
         newSystem->arrYears[i] = calloc(MONTHS,sizeof(size_t));
         if(newSystem->arrYears[i] == NULL){
@@ -116,17 +115,22 @@ infractionSystemADT newInfractionSystem(size_t minYear, size_t maxYear){
     return newSystem;
 }
 
-static int cmpIds(const TId *a, const TId *b) {
-    return (a->id - b->id);
-}
 
-static TId *fillArr(TId *array, size_t dim, TListInfractions *pInfraction){
-    array  = realloc(array,sizeof(*array) * dim);
-    errno=0;
-    CHECK_MEMORY(array);
-    array[dim-1].pNode = *pInfraction;
-    array[dim-1].id = (*pInfraction)->id;
-    qsort(array, dim, sizeof(TId),(int(*)(const void*,const void*))cmpIds);
+static TId *fillArr(TId *array,size_t id,size_t *dim,TListInfractions *pInfraction){
+    if(array == NULL || id >= *dim){
+        int newDim = id + 1;
+        array = realloc(array,sizeof(*array) * (newDim));
+        
+        errno=0;
+        CHECK_MEMORY(array);
+        for (size_t i = *dim; i < newDim; i++) {
+            array[i].pNode = NULL;
+            array[i].id = 0;
+        }
+        *dim = newDim;
+    }
+    array[id-1].pNode = *pInfraction;
+    array[id-1].id = (*pInfraction)->id;
     return array;
 }
 
@@ -160,26 +164,20 @@ int addInfraction(infractionSystemADT infractionSystem, char *description, size_
     infractionSystem->firstInfraction = addInfractionRec(infractionSystem->firstInfraction, description, id, &pInfractions, &added);
 
     if(added){
-        infractionSystem->dim++;
-        infractionSystem->arrId = fillArr(infractionSystem->arrId, infractionSystem->dim, &pInfractions);
+        //infractionSystem->dim++;
+        infractionSystem->arrId = fillArr(infractionSystem->arrId,id,&(infractionSystem->dim),&pInfractions);
     }
 
     return added;
 }
 
 static void addAgencyInfraction(TAgencyInfraction ** infVec, size_t id, size_t dim){
-    int i;
-    int flag = 1;
-    for(i = 0; i < dim && flag; i++){
-        if((*infVec)[i].id == 0){
-            (*infVec)[i].fineCount = 1;
-            (*infVec)[i].id = id;
-            flag = 0;
-        }
-        else if((*infVec)[i].id == id){
-            ((*infVec)[i].fineCount)++;
-            return;
-        }
+    size_t position = id - 1;
+    if ((*infVec)[position].id == 0) {
+        (*infVec)[position].fineCount = 1;
+        (*infVec)[position].id = id;
+    } else if ((*infVec)[position].id == id) {
+        ((*infVec)[position].fineCount)++;
     }
     return;
 }
@@ -227,26 +225,13 @@ static TListAgency addAgencyIter(TListAgency list, char *agName, size_t id, size
     return list;
 }
 
-static TListInfractions binarySearch(TId *arr, size_t id, size_t left, size_t right){
-    while(left <= right){
-        size_t mid = left + (right - left) / 2;
-        if(arr[mid].id == id){
-            return arr[mid].pNode;
-        }
-        if(arr[mid].id < id){
-            left = mid + 1;
-        }
-        else{
-            right = mid - 1;
-        }
-    }
-    return NULL;
-}
-
 //0 si no agrego, 1 si agrego una nueva agencia, 2 si la agencia ya estaba
 int addAgency(infractionSystemADT infractionSystem, char * agency, size_t id){
     size_t added = 0;
-    TListInfractions ticket = binarySearch(infractionSystem->arrId,id,0,infractionSystem->dim-1);
+    if(id >= infractionSystem->dim){
+        return added;
+    }
+    TListInfractions ticket = infractionSystem->arrId[id-1].pNode;
     if(ticket != NULL){
         infractionSystem->firstAgency = addAgencyIter(infractionSystem->firstAgency, agency, id,infractionSystem->dim,&added);
         if(added == 1){
@@ -294,7 +279,10 @@ static TListTickets addTicketIter(TListTickets listTick, char *plate,size_t *add
 int addTicket(infractionSystemADT infractionSystem,char *plate, size_t id){
     size_t added = 0;
     int letter = plate[0];
-    TListInfractions infractionNode = binarySearch(infractionSystem->arrId,id,0,infractionSystem->dim-1);
+    if(id >= infractionSystem->dim){
+        return added;
+    }
+    TListInfractions infractionNode = infractionSystem->arrId[id-1].pNode;
     if(infractionNode != NULL){
         infractionNode->arrPlates[letter] = addTicketIter(infractionNode->arrPlates[letter],plate,&added);
         infractionNode->totalFines++;
@@ -511,29 +499,30 @@ void freeQ2(TQuery2 *query2, size_t dim){
     free(query2);
 }
 
-static void searchMostPopular(TAgencyInfraction *infractions, size_t dim, TId *arr, char **mostPopular, int *fineCount){
+static void searchMostPopular(TAgencyInfraction *infractions,size_t dim, TId *arrId, char **mostPopular, int *fineCount){
     int i=0;
     int maxId=0;
     int maxCount=0;
     TListInfractions maxIdNode = NULL;
 
-    while(i < dim && infractions[i].id != 0){
-        if(maxCount < infractions[i].fineCount){
-            maxCount = infractions[i].fineCount;
-            maxId = infractions[i].id;
-            maxIdNode = binarySearch(arr, infractions[i].id, 0, dim-1);
-        } else if(maxCount == infractions[i].fineCount){
-            maxIdNode = binarySearch(arr, maxId, 0, dim-1);
-            TListInfractions currentIdNode = binarySearch(arr, infractions[i].id, 0, dim-1);
-            if(strcasecmp(maxIdNode->description, currentIdNode->description) > 0){ // Me quedo con el orden alfabetico
-                maxId = infractions[i].id;
+    while(i < dim){
+        if(infractions[i].fineCount != 0){
+            if(maxCount < infractions[i].fineCount){
                 maxCount = infractions[i].fineCount;
-                maxIdNode = currentIdNode;
+                maxId = infractions[i].id;
+                maxIdNode = arrId[maxId-1].pNode;
+            }else if(maxCount == infractions[i].fineCount){
+                maxIdNode = arrId[maxId-1].pNode;
+                TListInfractions currentIdNode = arrId[infractions[i].id-1].pNode;
+                if(strcasecmp(maxIdNode->description, currentIdNode->description) > 0){ // Me quedo con el orden alfabetico
+                    maxId = infractions[i].id;
+                    maxCount = infractions[i].fineCount;
+                    maxIdNode = currentIdNode;
+                }
             }
         }
         i++;
     }
-
     *fineCount = maxCount;
     *mostPopular = malloc(strlen(maxIdNode->description) + 1);
     if(mostPopular == NULL || errno == ENOMEM){
