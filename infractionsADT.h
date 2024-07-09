@@ -110,10 +110,11 @@ TQuery3 * query3(infractionSystemADT infractionSystem);
 //QUERY 4: Top 3 meses con mas multas por anio, ordenado cronologicamente por anio
 TQuery4 *query4(infractionSystemADT infractionSystem);
 
-//funciones iteracion y free Query1 (las vamos a necesitar para el main)
+//funciones iteracion y free para los queries
 void toBeginQ1(TQuery1 * query1);
 int hasNextQ1(TQuery1 * query1);
 void * nextQ1(TQuery1 * query1);
 void freeQ1(TQuery1 * query1);
-
+void freeQ2(TQuery2* query2, size_t dim);
+void freeQ3(TQuery3* query3);
 void freeQ4(TQuery4* query4);
