@@ -3,6 +3,8 @@ FLAGS = -Wall -pedantic -std=c99 -fsanitize=address -g
 OUTPUT_FILE_NY = infractionsNY
 OUTPUT_FILE_CHI = infractionsCHI
 DEPENDENCIES = infractionsADT.c main.c htmlTable.c
+QUERIES_CSV = query1.csv query2.csv query3.csv
+QUERIES_HTML = query1.html query2.html query3.html
 
 NY:
 	$(COMPILER) -o $(OUTPUT_FILE_NY) $(DEPENDENCIES) $(FLAGS) -DNY
@@ -12,10 +14,13 @@ CHI:
 
 all: NY CHI
 
-clean: cleanNY cleanCHI
+clean: cleanNY cleanCHI cleanQueries
 
 cleanNY:
 	rm -rf $(OUTPUT_FILE_NY) *.o
 
 cleanCHI:
 	rm -rf $(OUTPUT_FILE_CHI) *.o
+
+cleanQueries:
+	rm -rf $(QUERIES_CSV) $(QUERIES_HTML)
