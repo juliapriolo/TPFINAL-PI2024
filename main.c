@@ -55,6 +55,12 @@ int main(int argc, char *argv[]){
             fprintf( stderr, "Incorrect type for the minimum year\n");
             exit(ERROR_PAR); 
             }
+        if(atoi(argv[MIN_YEAR])){
+            fprintf( stderr, "Minimum year must be greater than %d\n", INITIAL_YEAR);
+            exit(ERROR_PAR); 
+            }
+
+        }
         minYear = atoi(argv[MIN_YEAR]);
     }
     else{
