@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
 #include <strings.h>
 #include <errno.h>
 #include "htmlTable.h"
@@ -161,7 +162,7 @@ int main(int argc, char *argv[]){
     
 
     //Carga de Query 2
-    int dim = dimAgency(infractionSystem);
+    int dim = dimAgencyList(infractionSystem);
     TQuery2 * q2 = query2(infractionSystem);
 
     char agencyq2[MAX_LINE];
@@ -204,7 +205,7 @@ int main(int argc, char *argv[]){
 
     //Carga el Query 4
     TQuery4 * q4 = query4(infractionSystem);
-    int q4Dim = dimArr(infractionSystem);
+    int q4Dim = dimArrYears(infractionSystem);
 
     char year[MAX_LINE];
     char topMonth1[MAX_LINE];
@@ -311,7 +312,7 @@ int readTickets(FILE *file, int plateColumn, int dateColumn, int idColumn, int a
             }
         }
         if(plate != NULL){
-            succesPlate = addTicket(system,id,plate);
+            succesPlate = addTicket(system,plate,id);
             if(!succesPlate){
                 fprintf(stderr, "Error adding plate: %s\n", plate);
                 succesRead = 0;

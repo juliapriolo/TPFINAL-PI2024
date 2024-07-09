@@ -1,7 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 typedef struct infractionSystemCDT * infractionSystemADT;
 
 /*
@@ -29,7 +25,7 @@ int addAgency(infractionSystemADT infractionSystem, char * agency, size_t id);
     Si es valido y la patente no se encuentra entonces la añade de forma alfabetica, sino,
     aumenta el contador de multas para dicha patente. En ambos casos retorna 1.
 */
-int addTicket(infractionSystemADT infractionSystem, size_t id, char *plate);
+int addTicket(infractionSystemADT infractionSystem,char *plate, size_t id);
 
 void addDate(infractionSystemADT system,int year,int month);
 
@@ -48,11 +44,13 @@ int hasNextByAgency(infractionSystemADT a);
 
 char *nextByAgency(infractionSystemADT a);
 
-size_t dimAgency(infractionSystemADT system);
+//Devuelve la dimension de la lista de agencias
+size_t dimAgencyList(infractionSystemADT system);
 
-size_t dimArr(infractionSystemADT system);
+//Devuelve la dimension del vector de años
+size_t dimArrYears(infractionSystemADT system);
 
-//funcion free infraction
+//funcion para liberar el sistema completo
 void freeInfractionSystem(infractionSystemADT infractionSystem);
 
 //Estructuras para los queries

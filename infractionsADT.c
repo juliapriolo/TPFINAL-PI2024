@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include "infractionsADT.h"
 #include <strings.h>
+#include "infractionsADT.h"
 
 #define INVALID_YEAR -1
 #define MONTHS 12
@@ -13,7 +13,7 @@
 #define CURRENT_YEAR 2024
 #define CHECK_MEMORY(ptr) if((ptr) == NULL || errno == ENOMEM) { return NULL;}
 #define BLOCK 100
-#define PLATE_ARR_SIZE 126
+#define PLATE_ARR_SIZE 128
 
 enum Meses {Enero = 0,Febrero,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Octubre,Noviembre,Diciembre};
 static char *monthNames[] = {"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
@@ -69,6 +69,23 @@ typedef struct infractionSystemCDT{
     size_t dim; //dimension total del arrId
 }infractionSystemCDT;
 
+static int cmpIds(const TId *a, const TId *b);
+static TId *fillArr(TId *array, size_t dim, TListInfractions *pInfraction);
+static TListInfractions binarySearch(TId *arr, size_t id, size_t left, size_t right);
+static char *copyStr(const char* str);
+static TListInfractions addInfractionRec(TListInfractions list, char *description, size_t id, TListInfractions *pInfractions, size_t *added);
+static TListAgency addAgencyIter(TListAgency list, char *agName, size_t id, size_t dim, size_t *added);
+static TListTickets addTicketIter(TListTickets listTick, char *plate,size_t *added);
+static void addAgencyInfraction(TAgencyInfraction ** infVec, size_t id, size_t dim);
+static TListQ1 addRecQ1(TListQ1 list, char * infractionName, size_t total);
+static char * getInfName(infractionSystemADT infractionSystem);
+static void searchMostPopular(TAgencyInfraction *infractions, size_t dim, TId *arr, char **mostPopular, int *fineCount);
+static void addQuery3(TListTickets ticketList[PLATE_ARR_SIZE], size_t * maxFineAmount, char * *maxPlate);
+static void freeArrYears(size_t **arrYears, size_t dim);
+static void freeTicketList(TListTickets list);
+static void freeInfractionList(TListInfractions list);
+static void freeAgencyList(TListAgency list);
+static void freeQ1Rec(TListQ1 listQ1);
 
 infractionSystemADT newInfractionSystem(size_t minYear, size_t maxYear){
     if(minYear > maxYear){
@@ -100,37 +117,29 @@ infractionSystemADT newInfractionSystem(size_t minYear, size_t maxYear){
     return newSystem;
 }
 
-//si a>b devuelve un numero mayor a 0, si a<b,, devuelve un numero 
-//menor a 0, y si son iguales devuelve 0
-static int cmpIds(const void *a, const void *b){ //CAMBIAR
-    const TId *idA = (const TId *)a;
-    const TId *idB = (const TId *)b;
-    return (idA->id - idB->id);
+static int cmpIds(const TId *a, const TId *b) {
+    return (a->id - b->id);
 }
-
 
 static TId *fillArr(TId *array, size_t dim, TListInfractions *pInfraction){
     array  = realloc(array,sizeof(*array) * dim);
     errno=0;
-    if(array==NULL || errno==ENOMEM){
-        return NULL;
-    }
+    CHECK_MEMORY(array);
     array[dim-1].pNode = *pInfraction;
     array[dim-1].id = (*pInfraction)->id;
-    qsort(array, dim, sizeof(TId), cmpIds);
+    qsort(array, dim, sizeof(TId),(int(*)(const void*,const void*))cmpIds);
     return array;
 }
 
-static TListInfractions addInfractionRec(TListInfractions list, char *description, size_t id, size_t *added, TListInfractions *pInfractions){
+static TListInfractions addInfractionRec(TListInfractions list, char *description, size_t id, TListInfractions *pInfractions, size_t *added){
     int c;
     if(list == NULL || (c = strcasecmp(list->description, description)) > 0){
         TListInfractions newNode = malloc(sizeof(TInfractions));
         CHECK_MEMORY(newNode);
         newNode->description = malloc(strlen(description) + 1);
         CHECK_MEMORY(newNode->description);
-
-        strcpy(newNode->description,description); //chequear esto
-        for (int i = 0; i < PLATE_ARR_SIZE; i++) {
+        strcpy(newNode->description,description);
+        for(int i = 0; i < PLATE_ARR_SIZE; i++){
             newNode->arrPlates[i] = NULL;
         }
         newNode->exists = 1;
@@ -142,7 +151,7 @@ static TListInfractions addInfractionRec(TListInfractions list, char *descriptio
         return newNode;
     }
     else if(c < 0){
-        list->tail = addInfractionRec(list->tail,description,id,added,pInfractions);
+        list->tail = addInfractionRec(list->tail,description,id,pInfractions,added);
     }
     return list;
 }
@@ -150,7 +159,7 @@ static TListInfractions addInfractionRec(TListInfractions list, char *descriptio
 int addInfraction(infractionSystemADT infractionSystem, char *description, size_t id){
     size_t added = 0; // flag para saber si agrego la infraccion
     TListInfractions pInfractions; // variable con los datos del nodo agregado
-    infractionSystem->firstInfraction = addInfractionRec(infractionSystem->firstInfraction, description, id, &added, &pInfractions);
+    infractionSystem->firstInfraction = addInfractionRec(infractionSystem->firstInfraction, description, id, &pInfractions, &added);
 
     if(added){
         infractionSystem->dim++;
@@ -160,7 +169,7 @@ int addInfraction(infractionSystemADT infractionSystem, char *description, size_
     return added;
 }
 
-static void addAgencyInfraction(TAgencyInfraction ** infVec, size_t  dim, size_t id){
+static void addAgencyInfraction(TAgencyInfraction ** infVec, size_t id, size_t dim){
     int i;
     int flag = 1;
     for(i = 0; i < dim && flag; i++){
@@ -178,45 +187,45 @@ static void addAgencyInfraction(TAgencyInfraction ** infVec, size_t  dim, size_t
 }
 
 
-static TListAgency addAgencyIter(TListAgency list, char *agName, size_t id, size_t dim, size_t *added) {
+static TListAgency addAgencyIter(TListAgency list, char *agName, size_t id, size_t dim, size_t *added){
     TListAgency current = list;
     TListAgency previous;
     int c;
 
-    while (current != NULL && (c = strcasecmp(current->agencyName, agName)) < 0) {
+    while(current != NULL && (c = strcasecmp(current->agencyName, agName)) < 0){
         previous = current;
         current = current->tail;
     }
 
     if (current != NULL && c == 0) {
         *added = 2;
-        addAgencyInfraction(&(current->infractions), dim, id);
+        addAgencyInfraction(&(current->infractions),id,dim);
         return list;
     }
 
     errno = 0;
     TListAgency newAgency = malloc(sizeof(TAgency));
-    if (newAgency == NULL || errno == ENOMEM) {
-        return NULL;
-    }
+    CHECK_MEMORY(newAgency);
+
     newAgency->agencyName = malloc(strlen(agName) + 1);
-    if (newAgency->agencyName == NULL || errno == ENOMEM) {
+    if (newAgency->agencyName == NULL) {
         free(newAgency);
         return NULL;
     }
     strcpy(newAgency->agencyName, agName);
+
     newAgency->infractions = calloc(dim, sizeof(TAgencyInfraction));
     if (newAgency->infractions == NULL || errno == ENOMEM) {
         free(newAgency->agencyName);
         free(newAgency);
         return NULL;
     }
-    addAgencyInfraction(&(newAgency->infractions), dim, id);
+    addAgencyInfraction(&(newAgency->infractions),id,dim);
     newAgency->tail = current;
 
-    if (current == list) {
+    if(current == list){
         list = newAgency;
-    } else {
+    }else{
         previous->tail = newAgency;
     }
 
@@ -226,7 +235,7 @@ static TListAgency addAgencyIter(TListAgency list, char *agName, size_t id, size
 
 static TListInfractions binarySearch(TId *arr, size_t id, size_t left, size_t right){
     while(left <= right){
-        size_t mid = left + (right - left)/2;
+        size_t mid = left + (right - left) / 2;
         if(arr[mid].id == id){
             return arr[mid].pNode;
         }
@@ -239,7 +248,6 @@ static TListInfractions binarySearch(TId *arr, size_t id, size_t left, size_t ri
     }
     return NULL;
 }
-
 
 //0 si no agrego, 1 si agrego una nueva agencia, 2 si la agencia ya estaba
 int addAgency(infractionSystemADT infractionSystem, char * agency, size_t id){
@@ -254,13 +262,6 @@ int addAgency(infractionSystemADT infractionSystem, char * agency, size_t id){
     return added;
 }
 
-
-/*
-    Buscar en el vector de ids si el id que le pasan es valido, lo busca con busqueda binaria.
-    Si no es valido retorna 0.
-    Si es valido, usa el puntero que se encuentra en el vector para acceder al first correspondiente. A partir de ahi,
-    si la patente no se encuentra entonces la añade de forma alfabetica, sino, aumenta el contador de multas para dicha patente. En ambos casos retorna 1.
-*/
 
 static TListTickets addTicketIter(TListTickets listTick, char *plate,size_t *added){
     TListTickets current = listTick;
@@ -280,9 +281,8 @@ static TListTickets addTicketIter(TListTickets listTick, char *plate,size_t *add
 
     errno = 0;
     TListTickets newTicket = calloc(1, sizeof(TTickets));
-    if(newTicket == NULL || errno == ENOMEM){
-        return NULL;
-    }
+    CHECK_MEMORY(newTicket);
+
     newTicket->plate = malloc((strlen(plate) + 1));
     if(newTicket->plate == NULL || errno == ENOMEM){
         free(newTicket);
@@ -294,20 +294,20 @@ static TListTickets addTicketIter(TListTickets listTick, char *plate,size_t *add
 
     if(current == listTick){
         listTick = newTicket;
-    }else {
+    }else{
         previous->tail = newTicket;
     }
     *added = 1;
     return listTick;
 }
 
-int addTicket(infractionSystemADT infractionSystem, size_t id,char *plate){
+int addTicket(infractionSystemADT infractionSystem,char *plate, size_t id){
     size_t added = 0;
-    int letter = plate[0]-1;
-    TListInfractions ticket = binarySearch(infractionSystem->arrId,id,0,infractionSystem->dim-1);
-    if(ticket != NULL){
-        ticket->arrPlates[letter] = addTicketIter(ticket->arrPlates[letter],plate,&added);
-        ticket->totalFines++;
+    int letter = plate[0];
+    TListInfractions infractionNode = binarySearch(infractionSystem->arrId,id,0,infractionSystem->dim-1);
+    if(infractionNode != NULL){
+        infractionNode->arrPlates[letter] = addTicketIter(infractionNode->arrPlates[letter],plate,&added);
+        infractionNode->totalFines++;
     }
     return added;
 }
@@ -318,6 +318,7 @@ void addDate(infractionSystemADT system,int year,int month){
         return;
     }
     system->arrYears[year-system->minYear][month-1]++;
+
     return;
 }
 
@@ -342,18 +343,18 @@ void * next(infractionSystemADT infractionSystem){
 //funciones de iteracion para las agencias
 
 void toBeginByAgency(infractionSystemADT a){
-    a->iterAgency=a->firstAgency;
+    a->iterAgency = a->firstAgency;
 }
 
 int hasNextByAgency(infractionSystemADT a){
-    return a->iterAgency!=NULL;
+    return a->iterAgency != NULL;
 }
 
 char *nextByAgency(infractionSystemADT a){
     if(!hasNextByAgency(a))
         return NULL;
-    char *ans=a->iterAgency->agencyName;
-    a->iterAgency=a->iterAgency->tail;
+    char *ans = a->iterAgency->agencyName;
+    a->iterAgency = a->iterAgency->tail;
     return ans;
 }
 
@@ -403,7 +404,7 @@ static void freeInfractionList(TListInfractions list){
     return;
 }
 
-void freeAgencyList(TListAgency list){
+static void freeAgencyList(TListAgency list){
     TListAgency current = list;
     TListAgency next;
     while(current != NULL){
@@ -422,23 +423,24 @@ void freeAgencyList(TListAgency list){
 
 void freeInfractionSystem(infractionSystemADT infractionSystem){
     free(infractionSystem->arrId);
-    freeArrYears(infractionSystem->arrYears, dimArr(infractionSystem));
+    freeArrYears(infractionSystem->arrYears, dimArrYears(infractionSystem));
     freeInfractionList(infractionSystem->firstInfraction);
     freeAgencyList(infractionSystem->firstAgency);
     free(infractionSystem);
     return;
 }
 
-//Funcion para copiar
-static char *copyStr(char *s) {
-    errno = 0;
-    char *ans = malloc(strlen(s) + 1);
-    CHECK_MEMORY(ans);
+static char *copyStr(const char* str) {
+    if(str == NULL){
+        return NULL;
+    }
 
-    strcpy(ans, s);
-    return ans;
+    char* copy = malloc(strlen(str) + 1);
+    CHECK_MEMORY(copy);
+    strcpy(copy, str);
+
+    return copy;
 }
-
 
 //QUERY 1 Total de multas por infraccion.
 //funciones iteracion y free Query1 (las vamos a necesitar para el main)
@@ -467,7 +469,6 @@ static void freeQ1Rec(TListQ1 listQ1){
     free(listQ1->infraction);
     free(listQ1);
 }
-
 
 void freeQ1(TQuery1 * query1){
     freeQ1Rec(query1->first);
@@ -499,7 +500,6 @@ static char * getInfName(infractionSystemADT infractionSystem){
     return infractionSystem->iterInfractions->description;
 }
 
-
 TQuery1 * query1(infractionSystemADT infractionSystem){
     size_t total;
     errno = 0;
@@ -519,7 +519,6 @@ TQuery1 * query1(infractionSystemADT infractionSystem){
 }
 
 //QUERY 2 Infraccion mas popular por agencia emisora.
-
 void freeQ2(TQuery2 *query2, size_t dim){
     for(int i=0;i<dim;i++){
         if(query2->agency != NULL){
@@ -557,6 +556,9 @@ static void searchMostPopular(TAgencyInfraction *infractions, size_t dim, TId *a
 
     *fineCount = maxCount;
     *mostPopular = malloc(strlen(maxIdNode->description) + 1);
+    if(mostPopular == NULL || errno == ENOMEM){
+        return;
+    }
     strcpy(*mostPopular,maxIdNode->description);
     return;
 }
@@ -565,6 +567,7 @@ static void searchMostPopular(TAgencyInfraction *infractions, size_t dim, TId *a
 
 TQuery2 *query2(infractionSystemADT system){
     TQuery2 *newQ2 = calloc(system->dimAgency, sizeof(*newQ2));
+    CHECK_MEMORY(newQ2);
     TListAgency aux = system->firstAgency;
     int i=0;
     while(aux != NULL){
@@ -575,7 +578,8 @@ TQuery2 *query2(infractionSystemADT system){
             newQ2[i].fineCount = fineCount;
             newQ2[i].mostPopularInf = mostPopular;
             newQ2[i].agency = malloc(strlen(aux->agencyName) + 1);
-            strcpy( newQ2[i].agency,aux->agencyName);     
+            CHECK_MEMORY(newQ2[i].agency);
+            strcpy(newQ2[i].agency,aux->agencyName);     
         }
         aux = aux->tail;
         i++;
@@ -729,7 +733,6 @@ TQuery4 *query4(infractionSystemCDT *infractionSystem) {
     return ans;
 }
 
-
 void freeQ4(TQuery4* query4){
     if(query4 == NULL){
         return;
@@ -743,11 +746,10 @@ void freeQ4(TQuery4* query4){
     free(query4);
 }
 
-
-size_t dimAgency(infractionSystemADT system){
+size_t dimAgencyList(infractionSystemADT system){
     return system->dimAgency;
 }
 
-size_t dimArr(infractionSystemADT system){
+size_t dimArrYears(infractionSystemADT system){
     return system->maxYear - system->minYear + 1;
 }
