@@ -313,13 +313,12 @@ int addTicket(infractionSystemADT infractionSystem, size_t id,char *plate){
 }
 
 
-int addDate(infractionSystemADT system,int year,int month){
+void addDate(infractionSystemADT system,int year,int month){
     if(year < system->minYear || year > system->maxYear || month < Enero || month > Diciembre){ //no se si puedo hacer esto xq month no es tipo enum Meses
-        return 0;
+        return;
     }
     system->arrYears[year-system->minYear][month-1]++;
-
-    return 1;
+    return;
 }
 
 //funciones de iteracion para la lista de infracciones
