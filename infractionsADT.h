@@ -31,7 +31,7 @@ int addAgency(infractionSystemADT infractionSystem, char * agency, size_t id);
 */
 int addTicket(infractionSystemADT infractionSystem, size_t id, char *plate);
 
-int addDate(infractionSystemADT system,int year,int month);
+void addDate(infractionSystemADT system,int year,int month);
 
 //funciones de iteracion para la lista de infracciones
 void toBegin(infractionSystemADT infractionSystem);
