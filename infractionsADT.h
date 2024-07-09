@@ -27,6 +27,7 @@ int addAgency(infractionSystemADT infractionSystem, char * agency, size_t id);
 */
 int addTicket(infractionSystemADT infractionSystem,char *plate, size_t id);
 
+//Agrega la fecha si esta dentro del rango especificado
 void addDate(infractionSystemADT system,int year,int month);
 
 //funciones de iteracion para la lista de infracciones
@@ -37,7 +38,6 @@ int hasNext(infractionSystemADT infractionSystem);
 void * next(infractionSystemADT infractionSystem);
 
 //funciones de iteracion para las agencias
-
 void toBeginByAgency(infractionSystemADT a);
 
 int hasNextByAgency(infractionSystemADT a);
