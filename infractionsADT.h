@@ -110,9 +110,15 @@ TQuery4 *query4(infractionSystemADT infractionSystem);
 
 //funciones iteracion y free para los queries
 void toBeginQ1(TQuery1 * query1);
+
 int hasNextQ1(TQuery1 * query1);
+
 void * nextQ1(TQuery1 * query1);
+
 void freeQ1(TQuery1 * query1);
+
 void freeQ2(TQuery2* query2, size_t dim);
+
 void freeQ3(TQuery3* query3);
+
 void freeQ4(TQuery4* query4);
