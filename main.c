@@ -24,7 +24,7 @@
 #define OK 0
 
 #define MAX_ARG 5
-#define MIN_ARG 4
+#define MIN_ARG 3
 #define DESCR 1
 #define ID_INFR 0
 
