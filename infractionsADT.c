@@ -4,10 +4,10 @@
 #include <errno.h>
 #include <strings.h>
 #include "infractionsADT.h"
+#include "parkingTickets.h"
 
 #define INVALID_YEAR -1
 #define MONTHS 12
-#define MAX_AG 30 //Despues cambiar el valor al que deberia ser
 #define EMPTY "EMPTY"
 #define START 0
 #define CURRENT_YEAR 2024
@@ -19,7 +19,7 @@ enum Meses {Enero = 0,Febrero,Marzo,Abril,Mayo,Junio,Julio,Agosto,Septiembre,Oct
 static char *monthNames[] = {"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
 
 typedef struct tickets{
-    char *plate;
+    char plate[LEN_PLATE];
     size_t fineCount;
     struct tickets *tail;
 }TTickets;
@@ -27,7 +27,7 @@ typedef struct tickets{
 typedef TTickets *TListTickets;
 
 typedef struct infractions{
-    char *description;
+    char description[MAX_LEN_DESCR];
     size_t id;
     size_t totalFines;// total de multas por infraccion
     TListTickets arrPlates[PLATE_ARR_SIZE];
@@ -43,7 +43,7 @@ typedef struct agencyInfraction{
 }TAgencyInfraction;
 
 typedef struct agency{
-    char *agencyName;
+    char agencyName[MAX_LEN_AGENCY];
     TAgencyInfraction *infractions;
     size_t dim;
     struct agency *tail;
@@ -136,8 +136,7 @@ static TListInfractions addInfractionRec(TListInfractions list, char *descriptio
     if(list == NULL || (c = strcasecmp(list->description, description)) > 0){
         TListInfractions newNode = malloc(sizeof(TInfractions));
         CHECK_MEMORY(newNode);
-        newNode->description = malloc(strlen(description) + 1);
-        CHECK_MEMORY(newNode->description);
+
         strcpy(newNode->description,description);
         for(int i = 0; i < PLATE_ARR_SIZE; i++){
             newNode->arrPlates[i] = NULL;
@@ -207,11 +206,7 @@ static TListAgency addAgencyIter(TListAgency list, char *agName, size_t id, size
     TListAgency newAgency = malloc(sizeof(TAgency));
     CHECK_MEMORY(newAgency);
 
-    newAgency->agencyName = malloc(strlen(agName) + 1);
-    if (newAgency->agencyName == NULL) {
-        free(newAgency);
-        return NULL;
-    }
+
     strcpy(newAgency->agencyName, agName);
 
     newAgency->infractions = calloc(dim, sizeof(TAgencyInfraction));
@@ -283,11 +278,7 @@ static TListTickets addTicketIter(TListTickets listTick, char *plate,size_t *add
     TListTickets newTicket = calloc(1, sizeof(TTickets));
     CHECK_MEMORY(newTicket);
 
-    newTicket->plate = malloc((strlen(plate) + 1));
-    if(newTicket->plate == NULL || errno == ENOMEM){
-        free(newTicket);
-        return NULL;
-    }
+
     strcpy(newTicket->plate, plate);
     newTicket->fineCount = 1;
     newTicket->tail = current;
@@ -375,9 +366,6 @@ static void freeTicketList(TListTickets list){
     TListTickets next;
     while(current != NULL){
         next = current->tail;
-        if(current->plate != NULL){
-            free(current->plate);
-        }
         free(current);
         current = next;
     }
@@ -390,9 +378,6 @@ static void freeInfractionList(TListInfractions list){
 
     while(current != NULL){
         next = current->tail;
-        if(current->description != NULL){
-            free(current->description);
-        }
         for(int i = 0; i < PLATE_ARR_SIZE; i++){
             if(current->arrPlates[i] != NULL){
                 freeTicketList(current->arrPlates[i]);
@@ -409,9 +394,6 @@ static void freeAgencyList(TListAgency list){
     TListAgency next;
     while(current != NULL){
         next = current->tail;
-        if(current->agencyName != NULL){
-            free(current->agencyName);
-        }
         if(current->infractions != NULL){
             free(current->infractions);
         }
@@ -434,7 +416,6 @@ static char *copyStr(const char* str) {
     if(str == NULL){
         return NULL;
     }
-
     char* copy = malloc(strlen(str) + 1);
     CHECK_MEMORY(copy);
     strcpy(copy, str);
