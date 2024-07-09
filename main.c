@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "infractionsADT.h"
+#include <strings.h>
 #include <errno.h>
 #include "htmlTable.h"
-#include <strings.h>
+#include "infractionsADT.h"
 
 #define HEADER1 "infraction;tickets"
 #define HEADER2 "issuingAgency;infraction;tickets"
@@ -52,6 +52,7 @@ int valid( const char* s);  //se asegura que el string sea todo de numeros
 void closeRFile(infractionSystemADT infractionSystem, FILE *data_files[], int error, int fileQuantity);
 void closeWFile(infractionSystemADT infractionSystem, FILE *csvFile[], htmlTable htmlFile[], int error, int queryQuantity);
 
+void printQuery3(TQuery3 *q3);
 
 int main(int argc, char *argv[]){
 
@@ -61,21 +62,21 @@ int main(int argc, char *argv[]){
     }
     int minYear, maxYear = INVALID_YEAR; 
 
-    if ( argc >= MIN_ARG ){ //Vemos si minYear es un tipo de dato valido
+    if (argc >= MIN_ARG ){ //Vemos si minYear es un tipo de dato valido
         if( !valid( argv[MIN_YEAR])){
             fprintf( stderr, "Incorrect type for the minimum year\n");
             exit(ERROR_PAR); 
             }
         minYear = atoi(argv[MIN_YEAR]);
     }
-    if ( argc == MAX_ARG ){    //Vemos si maxYear es un tipo de dato valido
+    if (argc == MAX_ARG ){    //Vemos si maxYear es un tipo de dato valido
         if(!valid( argv[MAX_YEAR]) ){
             fprintf( stderr, "Incorrect type for the maximum year\n");
             exit( ERROR_PAR);
             }
         maxYear = atoi(argv[MAX_YEAR]);
 
-        if ( minYear > maxYear ){   //Vemos que el año minimo no sea mayor que el año maximo
+        if (minYear > maxYear ){   //Vemos que el año minimo no sea mayor que el año maximo
             fprintf(stderr, "Invalid: minYear can not be greater than maxYear\n");
             exit(ERROR_PAR);
         }
@@ -87,7 +88,7 @@ int main(int argc, char *argv[]){
     FILE * data_files[] = {tickets,infractions};
 
     //Chequeo de open files exitoso
-    if (data_files[INFRACTIONS - 1] == NULL || data_files[TICKETS - 1] == NULL) {
+    if(data_files[INFRACTIONS - 1] == NULL || data_files[TICKETS - 1] == NULL) {
         fprintf(stderr, "Error opening files\n");           
         closeCSV(data_files, FILES);                                
         exit(ERROR_FILE); 
@@ -138,18 +139,15 @@ int main(int argc, char *argv[]){
             closeWFile(infractionSystem, filesCSV, filesHTML, ERROR_FILE, CANT_QUERY);
         }
     }
-    puts("Empezando query 1");
+
     // Carga de Query 1 
     char infractionq1[MAX_LINE];
     char totalq1[MAX_LINE];
 
-
     TQuery1 * q1 = query1(infractionSystem);
-
     toBeginQ1(q1);
- 
 
-    while ( hasNextQ1(q1)){
+    while(hasNextQ1(q1)){
         fprintf(filesCSV[FIRST], "%s;%ld\n" , q1->iter->infraction, q1->iter->totalInfracctions);  
         //Preparar para HTML
         sprintf (infractionq1, "%s", q1->iter->infraction);
@@ -161,11 +159,10 @@ int main(int argc, char *argv[]){
     }
     freeQ1(q1);
     
-    puts("Empezando query 2");
+
     //Carga de Query 2
     int dim = dimAgency(infractionSystem);
     TQuery2 * q2 = query2(infractionSystem);
-
 
     char agencyq2[MAX_LINE];
     char infractionq2[MAX_LINE];
@@ -184,14 +181,14 @@ int main(int argc, char *argv[]){
     }
     freeQ2(q2, dim);
 
-    puts("Empezando query 3");
+
     // Carga de Query 3 
     char infractionq3[MAX_LINE];
     char plateq3[MAX_LINE];
     char totalq3[MAX_LINE];
-    // puts("Empezando Query3");
 
     TQuery3 * q3 = query3(infractionSystem);
+    //printQuery3(q3);
 
     for(size_t i = 0; i < q3->dim; i++){
         fprintf(filesCSV[THIRD], "%s;%s;%ld\n", q3->vectorDeDatos[i].infraction, q3->vectorDeDatos[i].plate, q3->vectorDeDatos[i].fineAmount);
@@ -202,10 +199,9 @@ int main(int argc, char *argv[]){
         //Agrega fila HTML
         addHTMLRow(filesHTML[THIRD], infractionq3, plateq3, totalq3);
     }
-    
     freeQ3(q3);
 
-    puts("Empezando query 4");
+
     //Carga el Query 4
     TQuery4 * q4 = query4(infractionSystem);
     int q4Dim = dimArr(infractionSystem);
@@ -227,29 +223,30 @@ int main(int argc, char *argv[]){
     }
     freeQ4(q4);
 
+
     //cierra los archivos de escritura
     closeWFile(infractionSystem, filesCSV, filesHTML, OK, CANT_QUERY);
-    return OK;
 
+    return OK;
 }
 
 int readInfraction(FILE *file, int idColumn, int infractionColumn, infractionSystemADT infractionSystem){
     char currentLine[MAX_LINE];
-    int succed = 0;
+    int succedRead = 1;
 
     fgets(currentLine, MAX_LINE, file);
 
-    while (fgets(currentLine, MAX_LINE, file) != NULL) {
+    while(fgets(currentLine, MAX_LINE, file) != NULL){
         int columnIdx = 0;
         int id = 0;
         char *infraction = NULL;
         
         char *token = strtok(currentLine, DELIMITER);
 
-        while (token != NULL) {
-            if (columnIdx == idColumn) {
+        while(token != NULL && succedRead){
+            if (columnIdx == idColumn){
                 id = atoi(token);
-            } else if (columnIdx == infractionColumn){
+            }else if (columnIdx == infractionColumn){
                 char *newline = strchr(token,'\n');
                 if(newline){
                     *newline = '\0';
@@ -260,22 +257,22 @@ int readInfraction(FILE *file, int idColumn, int infractionColumn, infractionSys
             columnIdx++;
         }
 
-        if (infraction != NULL) {
-            succed = addInfraction(infractionSystem, infraction, id);
-
-            // if (!succed) {
-            //     printf("Error al agregar infracción: %s\n", infraction);    //CAMBIAR      
-            // }
+        if(infraction != NULL){
+            succedRead = addInfraction(infractionSystem, infraction, id);
+            if(!succedRead){
+                fprintf(stderr, "Error adding infraction: %s\n", infraction);
+                succedRead = 0;
+            }
         }
     }
-    return succed;
+    return succedRead;
 }
 
 int readTickets(FILE *file, int plateColumn, int dateColumn, int idColumn, int agencyColumn, infractionSystemADT system){
     char currentLine[MAX_LINE];
     int succesAgency = 0;
     int succesPlate = 0;
-    int succesDate = 0;
+    int succesRead = 1;
 
     fgets(currentLine, MAX_LINE, file);
 
@@ -289,7 +286,7 @@ int readTickets(FILE *file, int plateColumn, int dateColumn, int idColumn, int a
     
         char *token = strtok(currentLine,DELIMITER);
 
-        while(token != NULL){
+        while(token != NULL && succesRead){
             if(columnIdx == plateColumn){
                 plate = token;
             }else if(columnIdx == idColumn){
@@ -308,27 +305,26 @@ int readTickets(FILE *file, int plateColumn, int dateColumn, int idColumn, int a
         }
         if(agency != NULL){
             succesAgency = addAgency(system,agency,id);
-            // if(!succesAgency){
-            //     printf("Error al agregar agencia: %s\n", agency);   //CAMBIAR         
-
-            // }
+            if(!succesAgency){
+                fprintf(stderr, "Error adding agency: %s\n", agency);
+                succesRead = 0;
+            }
         }
         if(plate != NULL){
             succesPlate = addTicket(system,id,plate);
-            // if(!succesPlate){
-            //     printf("Error al agregar patente: %s\n", plate);    //CAMBIAR     
-
-            // }
+            if(!succesPlate){
+                fprintf(stderr, "Error adding plate: %s\n", plate);
+                succesRead = 0;
+            }
         }
         if(year != 0 && month != 0){
-            succesDate = addDate(system,year,month);
+            addDate(system,year,month);        
         }
         
     }
-    return (succesAgency && succesPlate);
+    return succesRead;
 }
 
-        
 //el header se pasa por parametro y dependiendo del query uso el respectivo header del define
 FILE *newCSV(const char *fileName, char *header){
     FILE *file = fopen(fileName, "w");
@@ -357,15 +353,18 @@ void closeCSV(FILE *files[], int fileQuantity){
 //funcion que cierra los archivos html que estan en el arreglo files
 void closeHTML(htmlTable files[], int fileQuantity){
     for(int i = 0; i < fileQuantity; i++){
-        if(files[i] != NULL)
+        if(files[i] != NULL){
             closeHTMLTable(files[i]);
+        }
     }
+    return;
 }
 
 // Cierra los archivos de lectura y libera el sistema, en caso de que halla un error, aborta
 void closeRFile(infractionSystemADT infractionSystem, FILE *data_files[], int error, int fileQuantity){
     freeInfractionSystem(infractionSystem);
     closeCSV(data_files, fileQuantity);
+    return;
 }
 
 // Cierra los archivos de escritura y libera el sistema, en caso de que halla un error, aborta
@@ -375,13 +374,15 @@ void closeWFile(infractionSystemADT infractionSystem, FILE *csvFile[], htmlTable
     closeHTML(htmlFile, queryQuantity);
     if(error){
         exit(error);
-    }    
+    }
+    return;
 }
 
-int valid( const char* s){
-    for ( int i = 0; s[i]; i++){
-        if ( !isdigit(s[i]))
+int valid(const char* s){
+    for(int i = 0; s[i]; i++){
+        if ( !isdigit(s[i])){
             return 0;
+        } 
     }
     return 1;
 }
