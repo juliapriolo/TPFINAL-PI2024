@@ -616,46 +616,53 @@ TQuery3 * query3(infractionSystemADT system){
     CHECK_MEMORY(ans);
     
     size_t k = 0;
-    size_t qValidInfrAmmount = 0; //cada vez que una infraccion tenga patentes, es valida, lo incremento
-
+    size_t qValidInfrAmmount = 0; // Cuenta de infracciones válidas
     toBegin(system);
-    while(hasNext(system)){ // recorro las infracciones
+    while(hasNext(system)){ // Recorre las infracciones
         if(system->iterInfractions->exists){
-            qValidInfrAmmount++;
-
             size_t qFineAmount = 0;
             char *qPlate = NULL;
 
+            // Calcula la patente con más multas para esta infracción
             addQuery3(system->iterInfractions->arrPlates, &qFineAmount, &qPlate);
 
-            if(ans->vectorDeDatos == NULL || qValidInfrAmmount > ans->dim){
-                size_t newDim = (BLOCK + ans->dim);
+            // Solo se procesan las infracciones que se cometieron
+            if (qFineAmount > 0) {
+                qValidInfrAmmount++;
 
-                ans->vectorDeDatos = realloc(ans->vectorDeDatos, newDim * sizeof(vecQuery3));
-                CHECK_MEMORY(ans->vectorDeDatos);
-                
-                for(size_t j = ans->dim; j < newDim; j++){
-                    ans->vectorDeDatos[j].fineAmount = 0;
-                    ans->vectorDeDatos[j].infraction = NULL;
-                    ans->vectorDeDatos[j].plate = NULL;
+                // Reasigna memoria para el vectorDeDatos si es necesario
+                if(ans->vectorDeDatos == NULL || qValidInfrAmmount > ans->dim){
+                    size_t newDim = (BLOCK + ans->dim);
+
+                    ans->vectorDeDatos = realloc(ans->vectorDeDatos, newDim * sizeof(vecQuery3));
+                    CHECK_MEMORY(ans->vectorDeDatos);
+                    
+                    for(size_t j = ans->dim; j < newDim; j++){
+                        ans->vectorDeDatos[j].fineAmount = 0;
+                        ans->vectorDeDatos[j].infraction = NULL;
+                        ans->vectorDeDatos[j].plate = NULL;
+                    }
+                    ans->dim = newDim;
                 }
-                ans->dim = newDim;
+
+                // Asigna memoria para la descripción de la infracción y la patente
+                ans->vectorDeDatos[k].infraction = malloc(strlen(system->iterInfractions->description) + 1);
+                CHECK_MEMORY(ans->vectorDeDatos[k].infraction);
+                strcpy(ans->vectorDeDatos[k].infraction, system->iterInfractions->description);
+
+                ans->vectorDeDatos[k].plate = malloc(strlen(qPlate) + 1);
+                CHECK_MEMORY(ans->vectorDeDatos[k].plate);
+                strcpy(ans->vectorDeDatos[k].plate, qPlate);
+
+                // Copia la información a la estructura de resultados
+                ans->vectorDeDatos[k].fineAmount = qFineAmount;
+                k++;
             }
-
-            ans->vectorDeDatos[k].infraction = malloc(strlen(system->iterInfractions->description) + 1);
-            CHECK_MEMORY(ans->vectorDeDatos[k].infraction);
-
-            ans->vectorDeDatos[k].plate = malloc((strlen(qPlate) + 1));
-            CHECK_MEMORY(ans->vectorDeDatos[k].plate);
-
-            ans->vectorDeDatos[k].fineAmount = qFineAmount;
-            strcpy(ans->vectorDeDatos[k].plate, qPlate);
-            strcpy(ans->vectorDeDatos[k].infraction, system->iterInfractions->description);
-            k++;
-           
         }
         next(system);
     }
+    
+    // Redimensiona el vectorDeDatos al tamaño correcto
     ans->vectorDeDatos = realloc(ans->vectorDeDatos, qValidInfrAmmount * sizeof(vecQuery3));
     CHECK_MEMORY(ans->vectorDeDatos);
 
