@@ -25,10 +25,8 @@ Sofía Inés Ratto (sratto0)
 
 ## Ejecución del programa
 
-- Correr el comando ./parkingTicketsNY ticketsNYC.csv infractionsNYC.csv año_minimo (opcional) año_maximo(opcional)
-  para ejecutar "parkingTicketsNY"
-- Correr el comando ./parkingTicketsCHI ticketsCHI.csv infractionsCHI.csv año_minimo (opcional) año_maximo(opcional) 
-  para ejecutar "parkingTicketsCHI"
+- Correr el comando ./parkingTicketsNY ticketsNYC.csv infractionsNYC.csv para ejecutar "parkingTicketsNY"
+- Correr el comando ./parkingTicketsCHI ticketsCHI.csv infractionsCHI.csv para ejecutar "parkingTicketsCHI"
 
 
 ## Eliminacion de archivos
