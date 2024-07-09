@@ -6,6 +6,7 @@
 #include <errno.h>
 #include "htmlTable.h"
 #include "infractionsADT.h"
+#include "parkingTickets.h"
 
 #define HEADER1 "infraction;tickets"
 #define HEADER2 "issuingAgency;infraction;tickets"
@@ -22,27 +23,13 @@
 #define ERROR_AG 3
 #define OK 0
 
-
 #define MAX_ARG 5
 #define MIN_ARG 4
 #define DESCR 1
 #define ID_INFR 0
 
 enum files{FIRST = 0, SECOND, THIRD, FOURTH};    //Enum para buscar los archivos filescsv y fileshtml
-
 enum programArguments{PROGRAM = 0,TICKETS,INFRACTIONS, MIN_YEAR, MAX_YEAR};  //enum para el orden de los argumentos por linea de comando
-
-#ifdef NY
-#define MAX_LEN_AGENCY 35 //largo maximo para una agencia en Nueva York
-#define MAX_LEN_DESCR 30 //largo maximo para el nombre de una infracción en Nueva York
-#define LEN_PLATE 7
-enum arguments{PLATE=0, DATE, ID, FINE_AMOUNT, AGENCY}; //NY
-#else
-#define MAX_LEN_AGENCY 13 //largo maximo para una agencia en Chicago
-#define MAX_LEN_DESCR 50 //largo maximo para el nombre de una infraccion en Chicago
-#define LEN_PLATE 10
-enum arguments{DATE=0, PLATE, AGENCY, ID, FINE_AMOUNT}; //CHI
-#endif
 
 int readInfraction(FILE *file, int idColumn, int infractionColumn, infractionSystemADT infractionSystem);   //lee el archivo de infracciones
 int readTickets(FILE *file, int plateColumn, int dateColumn, int idColumn, int agencyColumn, infractionSystemADT system);   //lee el archivo de tickets
@@ -305,6 +292,11 @@ int readTickets(FILE *file, int plateColumn, int dateColumn, int idColumn, int a
             columnIdx++;
         }
         if(agency != NULL){
+            static int total = 0;
+            total++;
+            if((total % 100000) == 0){
+                printf("Procesando:%d\n",total);
+            }
             succesAgency = addAgency(system,agency,id);
             if(!succesAgency){
                 fprintf(stderr, "Error adding agency: %s\n", agency);
