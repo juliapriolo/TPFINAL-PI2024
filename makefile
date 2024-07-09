@@ -1,7 +1,7 @@
 COMPILER = gcc
 FLAGS = -Wall -pedantic -std=c99 -fsanitize=address -g
-OUTPUT_FILE_NY = infractionsNY
-OUTPUT_FILE_CHI = infractionsCHI
+OUTPUT_FILE_NY = parkingTicketsNY
+OUTPUT_FILE_CHI = parkingTicketsCHI
 DEPENDENCIES = infractionsADT.c main.c htmlTable.c
 QUERIES_CSV = query1.csv query2.csv query3.csv
 QUERIES_HTML = query1.html query2.html query3.html
