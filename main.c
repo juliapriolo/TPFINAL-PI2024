@@ -55,17 +55,16 @@ int main(int argc, char *argv[]){
             fprintf(stderr, "Incorrect type for the minimum year\n");
             exit(ERROR_PAR); 
             }
-        if(atoi(argv[MIN_YEAR])){
+            minYear = atoi(argv[MIN_YEAR]);
+        if(minYear< INITIAL_YEAR){
             fprintf( stderr, "Minimum year must be greater than %d\n", INITIAL_YEAR);
             exit(ERROR_PAR); 
             }
 
+        } else{
+            minYear = INITIAL_YEAR;
         }
-        minYear = atoi(argv[MIN_YEAR]);
-    }
-    else{
-        minYear = INITIAL_YEAR;
-    }
+
     if (argc == MAX_ARG ){    //Vemos si maxYear es un tipo de dato valido
         if(!valid( argv[MAX_YEAR]) ){
             fprintf( stderr, "Incorrect type for the maximum year\n");
