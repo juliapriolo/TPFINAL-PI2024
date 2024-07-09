@@ -69,6 +69,9 @@ int main(int argc, char *argv[]){
             exit(ERROR_PAR);
         }
     }
+    else{
+        maxYear = CURRENT_YEAR;
+    }
 
     //Inicializacion de archivos de lectura
     FILE * infractions = fopen(argv[INFRACTIONS], "r");

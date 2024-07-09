@@ -10,7 +10,6 @@
 #define MONTHS 12
 #define EMPTY "EMPTY"
 #define START 0
-#define CURRENT_YEAR 2024
 #define CHECK_MEMORY(ptr) if((ptr) == NULL || errno == ENOMEM) { return NULL;}
 #define BLOCK 100
 #define PLATE_ARR_SIZE 128

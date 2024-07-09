@@ -9,3 +9,4 @@ enum arguments{PLATE=0, DATE, ID, FINE_AMOUNT, AGENCY}; //NY
 enum arguments{DATE=0, PLATE, AGENCY, ID, FINE_AMOUNT}; //CHI
 #endif
 #define LEN_PLATE 11
+#define CURRENT_YEAR 2024
